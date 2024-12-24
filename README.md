@@ -11,7 +11,7 @@
 <br>
 
 ## ⚙️ 시스템 구성도 ⚙️
-![image](https://github.com/user-attachments/assets/526b3246-73ff-4dc7-bd39-bd24cf5d57b0)
+![시스템 구성도](https://github.com/user-attachments/assets/a919fb19-cc34-43e8-9904-588b0235a5e7)
 <br>
 
 ## ⚒️ 기술 스택 ⚒️
