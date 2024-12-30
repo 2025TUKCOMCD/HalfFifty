@@ -14,7 +14,7 @@
 <br />
 
 ## 📷 이미지
-<img src="파일주소" width="50%" height="50%" />
+<img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" width="50%" height="50%" />
 <br />
 
 ## ✔️ 체크 리스트
