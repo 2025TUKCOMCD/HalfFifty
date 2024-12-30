@@ -55,5 +55,9 @@
 ![image](https://github.com/user-attachments/assets/fd2a870e-213a-45c1-8812-ca3428cee77c)
 <br>
 
+## 🏷️ Labels 🏷️
+<img width="1223" alt="image" src="https://github.com/user-attachments/assets/3fe01077-93a9-46a6-86a8-8a369bcbfbc9" />
+<br>
+
 ## 🚨 정기회의 🚨
 - 화요일 22시 30분
