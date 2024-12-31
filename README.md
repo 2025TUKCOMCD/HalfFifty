@@ -59,5 +59,53 @@
 <img width="1223" alt="image" src="https://github.com/user-attachments/assets/3fe01077-93a9-46a6-86a8-8a369bcbfbc9" />
 <br>
 
+## ✔️ Git Commit Mesage Convention ✔️
+<ol>
+  <li>
+    <div>
+      커밋 유형
+    </div>
+    <div>
+    <img width="525" alt="image" src="https://github.com/user-attachments/assets/bda6ea18-d756-4a6b-9c1a-b307e7cff06e" />
+    </div>
+  </li>
+  <br>
+  <li>
+    <div>
+      제목과 본문 빈행으로 분리
+    </div>
+    <div>
+      - 커밋 유형 이후, 제목과 본문은 한글로 최대한 작성하기<br>
+      - 본문에는 변경한 내용과 이유 설명
+    </div>
+  </li>
+  <br>
+  <li>
+    제목 첫 글자는 대문자로, 끝에는 . 금지
+  </li>
+  <br>
+  <li>
+    자신의 코드가 직관적으로 바로 파악될 거라 생각하지 않기
+  </li>
+  <br>
+  <li>
+    <div>
+      여러가지 항목이 있다면 글머리 기호 통해 가독성 높이기
+    </div>
+    <div>
+      <img width="695" alt="image" src="https://github.com/user-attachments/assets/d8364f3e-df54-4664-87af-5bc30498abeb" />
+    </div>
+  </li>
+  <br>
+  <li>
+    <div>한 커밋에는 한 가지 문제만</div>
+    <div>
+      - 추적 가능하도록 유지해주기<br>
+      - 너무 많은 문제를 한 커밋에 담으면 추적하기 어려움
+    </div>
+  </li>
+</ol>
+<br>
+
 ## 🚨 정기회의 🚨
 - 화요일 22시 30분
