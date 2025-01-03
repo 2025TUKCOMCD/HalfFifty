@@ -1,6 +1,6 @@
 ---
 name: Issue Template
-about: 이슈 생성
+about: 수어, 경고음 데이터 전처리 및 학습
 title: ''
 labels: ''
 assignees: ''
