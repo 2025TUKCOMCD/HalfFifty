@@ -1,5 +1,5 @@
-- 제목 : Feat(issue 번호): 기능명
-  ex) Feat(17): pull request template 작성
+- 제목 : Feat: 기능명
+  ex) Feat: pull request template 작성
   (확인 후 지워주세요)
 
 ## 🔘 Part
