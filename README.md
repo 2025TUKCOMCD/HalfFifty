@@ -106,6 +106,10 @@
       - 너무 많은 문제를 한 커밋에 담으면 추적하기 어려움
     </div>
   </li>
+  <li>
+    <p>Branch Name</p>
+    <img width="239" alt="image" src="https://github.com/user-attachments/assets/fe73bd79-5c28-4b29-9fe8-f7eebef974f5" />
+  </li>
 </ol>
 <br>
 
