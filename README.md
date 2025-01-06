@@ -56,7 +56,7 @@
 <br>
 
 ## 🏷️ Labels 🏷️
-<img width="1223" alt="image" src="https://github.com/user-attachments/assets/3fe01077-93a9-46a6-86a8-8a369bcbfbc9" />
+<img width="1224" alt="image" src="https://github.com/user-attachments/assets/56f97062-ba6e-439c-8cf3-f72c6a48d5e2" />
 <br>
 
 ## ✔️ Git Commit Mesage Convention ✔️
