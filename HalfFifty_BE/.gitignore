@@ -17,7 +17,6 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 .idea/
-.github/
 
 ### IntelliJ IDEA ###
 .idea
