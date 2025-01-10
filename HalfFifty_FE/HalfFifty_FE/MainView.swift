@@ -144,7 +144,7 @@ struct MainView: View {
                                         .padding(.bottom, 2)
                                 
                                 // 상태 메시지
-                                if(!self.useCamera) {
+                                if(!self.useCamera && !self.onCamera) {
                                     Text("카메라 권한이 없습니다.")
                                         .foregroundColor(.white)
                                         .font(.system(size: 16))
@@ -156,12 +156,12 @@ struct MainView: View {
                                         .multilineTextAlignment(.center) // 텍스트 정렬
                                 }
                             }
-                            .padding(!self.onCamera ? .top : [], !self.onCamera ? 60 : 0)
+                            .padding(self.useCamera && !self.onCamera ? .top : [], self.useCamera && !self.onCamera ? 60 : 0)
                             
                             Spacer()
                             
                             //카메라 on 버튼
-                            if(!self.onCamera) {
+                            if(self.useCamera && !self.onCamera) {
                                 Button(action: {
                                     // 버튼 클릭 시
                                     self.onCamera = true
