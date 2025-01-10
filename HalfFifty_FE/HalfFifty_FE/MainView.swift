@@ -11,6 +11,10 @@ struct MainView: View {
     // 메뉴 표시 여부 바인딩
     @Binding var showMenuView : Bool
     
+    // 나중에 Binding으로 변경
+    @State var onCamera : Bool = false // 카메라 켜져있는지 여부
+    @State var useCamera : Bool = false // 카메라 사용 권한 여부
+    
     var body: some View {
         GeometryReader { geometry in
             VStack {
@@ -74,9 +78,9 @@ struct MainView: View {
                             
                             Spacer()
                             
+                            // 번역어 선택
                             Button(action: {
                                 // 버튼 클릭 시
-                                
                             }) {
                                 // 버튼 스타일
                                 Text("한국어")
@@ -109,44 +113,56 @@ struct MainView: View {
                                     .padding(.bottom, 2)
                             
                             // 상태 메시지
-                            Text("카메라가 꺼져있습니다.")
-                                .foregroundColor(.white)
-                                .font(.system(size: 16))
-                                .multilineTextAlignment(.center) // 텍스트 정렬
+                            if(!self.useCamera) {
+                                Text("카메라 권한이 없습니다.")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 16))
+                                    .multilineTextAlignment(.center) // 텍스트 정렬
+                            } else if(!self.onCamera) {
+                                Text("카메라가 꺼져있습니다.")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 16))
+                                    .multilineTextAlignment(.center) // 텍스트 정렬
+                            }
                         }
-                        .padding(.top, 40)
+                        .padding(!self.onCamera ? .top : [], !self.onCamera ? 60 : 0)
                         
                         Spacer()
                         
                         //카메라 on 버튼
-                        Button(action: {
-                            // 버튼 클릭 시
-                        }) {
-                            // 버튼 스타일
-                            Image(systemName: "video.fill")
-                                .padding(.vertical, 13)
-                                .padding(.horizontal, 9)
-                                .background(Color.white)
-                                .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                .cornerRadius(50)
+                        if(!self.onCamera) {
+                            Button(action: {
+                                // 버튼 클릭 시
+                                self.onCamera = true
+                            }) {
+                                // 버튼 스타일
+                                Image(systemName: "video.fill")
+                                    .padding(.vertical, 13)
+                                    .padding(.horizontal, 9)
+                                    .background(Color.white)
+                                    .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                    .cornerRadius(50)
+                            }
+                            .padding(.bottom, 20)
                         }
-                        .padding(.bottom, 20)
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                     .background(Color.black)
                     .cornerRadius(8)
                     .shadow(radius: 2) // 그림자 추가로 시각적 효과
 
-                    // 안내 문구 영역
-                    VStack {
-                        Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
-                            .foregroundColor(.white)
-                            .font(.system(size: 16))
+                    if(!self.useCamera || !self.onCamera) {
+                        // 안내 문구 영역
+                        VStack {
+                            Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16))
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
+                        .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
+                        .cornerRadius(8)
+                        .shadow(radius: 2)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
-                    .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
-                    .cornerRadius(8)
-                    .shadow(radius: 2)
                 }
                 .padding(10)
             }
