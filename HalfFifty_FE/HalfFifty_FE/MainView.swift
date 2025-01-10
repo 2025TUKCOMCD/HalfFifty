@@ -15,7 +15,7 @@ struct MainView: View {
     @State var onCamera : Bool = false // 카메라 켜져있는지 여부
     @State var useCamera : Bool = false // 카메라 사용 권한 여부
     
-    @State var changeTosignLanguage : Bool = false // true: 수어를 번역, false: 수어로 번역
+    @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
     
     @State var text : String = "" // 번역할 문장 입력
     @State var useMicrophone : Bool = false // 음성 임력 사용 여부
