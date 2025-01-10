@@ -97,19 +97,40 @@ struct MainView: View {
                     }
                     
                     VStack(alignment: .center) {
-                        // 카메라 꺼짐 아이콘
-                        Image(systemName: "video.slash.fill")
-                                .resizable() // 크기 조정 활성화
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 66)
-                                .foregroundColor(.white)
-                                .padding(.bottom, 2)
+                        Spacer()
                         
-                        // 상태 메시지
-                        Text("카메라가 꺼져있습니다.")
-                            .foregroundColor(.white)
-                            .font(.system(size: 16))
-                            .multilineTextAlignment(.center) // 텍스트 정렬
+                        VStack {
+                            // 카메라 꺼짐 아이콘
+                            Image(systemName: "video.slash.fill")
+                                    .resizable() // 크기 조정 활성화
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 66)
+                                    .foregroundColor(.white)
+                                    .padding(.bottom, 2)
+                            
+                            // 상태 메시지
+                            Text("카메라가 꺼져있습니다.")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16))
+                                .multilineTextAlignment(.center) // 텍스트 정렬
+                        }
+                        .padding(.top, 40)
+                        
+                        Spacer()
+                        
+                        //카메라 on 버튼
+                        Button(action: {
+                            // 버튼 클릭 시
+                        }) {
+                            // 버튼 스타일
+                            Image(systemName: "video.fill")
+                                .padding(.vertical, 13)
+                                .padding(.horizontal, 9)
+                                .background(Color.white)
+                                .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                .cornerRadius(50)
+                        }
+                        .padding(.bottom, 20)
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                     .background(Color.black)
