@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .  # Dockerfile이 있는 디렉토리
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"  # 로컬 8080 포트를 컨테이너의 8080 포트로 매핑
+    environment:
+      SPRING_PROFILES_ACTIVE: prod  # Spring Boot의 활성화된 프로파일 설정
+    restart: always  # 컨테이너가 종료되면 자동 재시작doc
