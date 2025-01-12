@@ -56,6 +56,11 @@ class CameraViewController: UIViewController {
         captureSession.startRunning()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        videoPreviewLayer?.frame = view.bounds
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         captureSession?.stopRunning()
