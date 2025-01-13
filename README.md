@@ -113,6 +113,9 @@
 </ol>
 <br>
 
+## 🎨 Figma 🎨
+- [figma link](https://www.figma.com/design/l6RaATWN1euPsOVXy66qE4/%EB%B0%98%EC%98%A4%EC%8B%AD?node-id=0-1&t=qgGHWpCWcySMpXmq-1)
+
 ## 🚨 회의 🚨
 - [3학년 2학기] 정기회의: 화요일 22시 30분
 - [3학년 겨울학기] 정기회의: 목요일 22시, 데일리 스크럼: 12시
