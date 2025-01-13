@@ -14,7 +14,7 @@ struct MainView: View {
     
     // 나중에 Binding으로 변경
     @State var onCamera : Bool = false // 카메라 켜져있는지 여부
-    @State var useCamera : Bool = true // 카메라 사용 권한 여부
+    @State var useCamera : Bool = false // 카메라 사용 권한 여부
     @State var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
     
     @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
@@ -163,21 +163,30 @@ struct MainView: View {
                                                 .multilineTextAlignment(.center) // 텍스트 정렬
                                         }
                                     }
-                                    .padding(self.useCamera && !self.onCamera ? .top : [], self.useCamera && !self.onCamera ? 60 : 0)
+                                    .padding(.top, 60)
                                     
                                     Spacer()
                                     
                                     // 카메라 on 버튼
-                                    if(self.useCamera && !self.onCamera) {
+                                    if !useCamera {
+                                        Button("설정으로 이동") {
+                                            openAppSettings()
+                                        }
+                                        .padding(.vertical, 13)
+                                        .padding(.horizontal, 20)
+                                        .background(Color.white)
+                                        .foregroundColor(Color.blue)
+                                        .cornerRadius(8)
+                                        .padding(.bottom, 20)
+                                    } else if !onCamera {
                                         Button(action: {
-                                            // 버튼 클릭 시 카메라 켜짐
                                             self.onCamera = true
                                         }) {
                                             Image(systemName: "video.fill")
                                                 .padding(.vertical, 13)
                                                 .padding(.horizontal, 9)
                                                 .background(Color.white)
-                                                .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                                .foregroundColor(Color.blue)
                                                 .cornerRadius(50)
                                         }
                                         .padding(.bottom, 20)
@@ -267,15 +276,33 @@ struct MainView: View {
             }
         }
         .onAppear {
-            requestCameraAccess()
+            checkCameraAuthorizationStatus()
         }
     }
-    // 카메라 권한 요청
-    func requestCameraAccess() {
-        AVCaptureDevice.requestAccess(for: .video) { granted in
-            DispatchQueue.main.async {
-                self.useCamera = granted
+    
+    // 카메라 권한 확인 및 요청
+    func checkCameraAuthorizationStatus() {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .authorized:
+            self.useCamera = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    self.useCamera = granted
+                }
             }
+        case .denied, .restricted:
+            self.useCamera = false
+        @unknown default:
+            self.useCamera = false
+        }
+    }
+
+    // 앱 설정 화면 열기
+    func openAppSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
 }
