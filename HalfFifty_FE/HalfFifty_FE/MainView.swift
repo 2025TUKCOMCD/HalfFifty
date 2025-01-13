@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct MainView: View {
     // 메뉴 표시 여부 바인딩
@@ -14,6 +15,7 @@ struct MainView: View {
     // 나중에 Binding으로 변경
     @State var onCamera : Bool = false // 카메라 켜져있는지 여부
     @State var useCamera : Bool = false // 카메라 사용 권한 여부
+    @State var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
     
     @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
     
@@ -48,12 +50,10 @@ struct MainView: View {
                     // 정렬을 위한 빈 투명 영역 추가
                     Color.clear
                         .frame(width: 24, height: 24)
-
                 }
                 .padding(.top, 10)
                 .padding(.bottom, 22)
-                .padding(.leading, 20)
-                .padding(.trailing, 20)
+                .padding(.horizontal, 20)
                 .frame(width: geometry.size.width)
                 .background(Color.white)
                 .shadow(radius: 4)
@@ -130,58 +130,98 @@ struct MainView: View {
                     }
                     
                     // 카메라 영역
-                    if (self.changeTosignLanguage) {
-                        VStack(alignment: .center) {
-                            Spacer()
-                            
-                            VStack {
-                                // 카메라 꺼짐 아이콘
-                                Image(systemName: "video.slash.fill")
-                                        .resizable() // 크기 조정 활성화
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 66)
-                                        .foregroundColor(.white)
-                                        .padding(.bottom, 2)
-                                
-                                // 상태 메시지
-                                if(!self.useCamera && !self.onCamera) {
-                                    Text("카메라 권한이 없습니다.")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 16))
-                                        .multilineTextAlignment(.center) // 텍스트 정렬
-                                } else if(!self.onCamera) {
-                                    Text("카메라가 꺼져있습니다.")
-                                        .foregroundColor(.white)
-                                        .font(.system(size: 16))
-                                        .multilineTextAlignment(.center) // 텍스트 정렬
-                                }
-                            }
-                            .padding(self.useCamera && !self.onCamera ? .top : [], self.useCamera && !self.onCamera ? 60 : 0)
-                            
-                            Spacer()
-                            
-                            //카메라 on 버튼
-                            if(self.useCamera && !self.onCamera) {
-                                Button(action: {
-                                    // 버튼 클릭 시
-                                    self.onCamera = true
-                                }) {
-                                    // 버튼 스타일
-                                    Image(systemName: "video.fill")
+                    if self.changeTosignLanguage {
+                        ZStack {
+                            if self.useCamera && self.onCamera {
+                                CameraView(isFrontCamera: $isFrontCamera)
+                                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
+                                    .cornerRadius(8)
+                                    .shadow(radius: 2)
+                            } else {
+                                VStack(alignment: .center) {
+                                    Spacer()
+                                    
+                                    VStack {
+                                        // 카메라 꺼짐 아이콘
+                                        Image(systemName: "video.slash.fill")
+                                            .resizable() // 크기 조정 활성화
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 66)
+                                            .foregroundColor(.white)
+                                            .padding(.bottom, 2)
+                                        
+                                        // 상태 메시지
+                                        if(!self.useCamera && !self.onCamera) {
+                                            Text("카메라 권한이 없습니다.")
+                                                .foregroundColor(.white)
+                                                .font(.system(size: 16))
+                                                .multilineTextAlignment(.center) // 텍스트 정렬
+                                        } else if(!self.onCamera) {
+                                            Text("카메라가 꺼져있습니다.")
+                                                .foregroundColor(.white)
+                                                .font(.system(size: 16))
+                                                .multilineTextAlignment(.center) // 텍스트 정렬
+                                        }
+                                    }
+                                    .padding(.top, 60)
+                                    
+                                    Spacer()
+                                    
+                                    // 카메라 on 버튼
+                                    if !useCamera {
+                                        Button("설정으로 이동") {
+                                            openAppSettings()
+                                        }
                                         .padding(.vertical, 13)
-                                        .padding(.horizontal, 9)
+                                        .padding(.horizontal, 20)
                                         .background(Color.white)
-                                        .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                        .cornerRadius(50)
+                                        .foregroundColor(Color.blue)
+                                        .cornerRadius(8)
+                                        .padding(.bottom, 20)
+                                    } else if !onCamera {
+                                        Button(action: {
+                                            self.onCamera = true
+                                        }) {
+                                            Image(systemName: "video.fill")
+                                                .padding(.vertical, 13)
+                                                .padding(.horizontal, 9)
+                                                .background(Color.white)
+                                                .foregroundColor(Color.blue)
+                                                .cornerRadius(50)
+                                        }
+                                        .padding(.bottom, 20)
+                                    }
                                 }
-                                .padding(.bottom, 20)
+                                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
+                                .background(Color.black)
+                                .cornerRadius(8)
+                                .shadow(radius: 2) // 그림자 추가로 시각적 효과
+                            }
+                            
+                            // 카메라 전환 버튼
+                            if self.useCamera && self.onCamera {
+                                VStack {
+                                    Spacer() // 나머지 공간을 차지하여 버튼을 하단에 배치
+
+                                    Button(action: {
+                                        self.isFrontCamera.toggle() // 상태 변경
+                                    }) {
+                                        Image(systemName: "repeat")
+                                            .padding(.vertical, 13)
+                                            .padding(.horizontal, 11)
+                                            .background(Color.white)
+                                            .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                            .cornerRadius(50)
+                                    }
+                                    .padding(.bottom, 20) // 버튼과 하단 사이의 간격을 조정
+                                }
                             }
                         }
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                         .background(Color.black)
                         .cornerRadius(8)
-                        .shadow(radius: 2) // 그림자 추가로 시각적 효과
-
+                        .shadow(radius: 2)
+                        
                         if(!self.useCamera || !self.onCamera) {
                             // 안내 문구 영역
                             VStack {
@@ -234,6 +274,35 @@ struct MainView: View {
                 }
                 .padding(10)
             }
+        }
+        .onAppear {
+            checkCameraAuthorizationStatus()
+        }
+    }
+    
+    // 카메라 권한 확인 및 요청
+    func checkCameraAuthorizationStatus() {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .authorized:
+            self.useCamera = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    self.useCamera = granted
+                }
+            }
+        case .denied, .restricted:
+            self.useCamera = false
+        @unknown default:
+            self.useCamera = false
+        }
+    }
+
+    // 앱 설정 화면 열기
+    func openAppSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
 }
