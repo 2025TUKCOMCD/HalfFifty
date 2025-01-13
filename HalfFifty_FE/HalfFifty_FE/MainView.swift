@@ -15,7 +15,7 @@ struct MainView: View {
     // 나중에 Binding으로 변경
     @State var onCamera : Bool = false // 카메라 켜져있는지 여부
     @State var useCamera : Bool = true // 카메라 사용 권한 여부
-    @State var isFrontCamera: Bool = true // 현재 카메라가 전면인지 후면인지 여부
+    @State var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
     
     @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
     
@@ -133,7 +133,7 @@ struct MainView: View {
                     if self.changeTosignLanguage {
                         ZStack {
                             if self.useCamera && self.onCamera {
-                                CameraView()
+                                CameraView(isFrontCamera: $isFrontCamera)
                                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                     .cornerRadius(8)
                                     .shadow(radius: 2)
@@ -195,8 +195,7 @@ struct MainView: View {
                                     Spacer() // 나머지 공간을 차지하여 버튼을 하단에 배치
 
                                     Button(action: {
-                                        // 버튼 클릭 시 카메라 전환
-                                        self.isFrontCamera.toggle()
+                                        self.isFrontCamera.toggle() // 상태 변경
                                     }) {
                                         Image(systemName: "repeat")
                                             .padding(.vertical, 13)

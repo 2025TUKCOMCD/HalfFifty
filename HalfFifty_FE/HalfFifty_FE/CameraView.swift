@@ -9,62 +9,88 @@ import SwiftUI
 import AVFoundation
 
 struct CameraView: UIViewControllerRepresentable {
+    @Binding var isFrontCamera: Bool // 전면/후면 상태를 SwiftUI와 바인딩
+    
     func makeUIViewController(context: Context) -> CameraViewController {
-        return CameraViewController()
+        let cameraVC = CameraViewController()
+        cameraVC.currentDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: isFrontCamera ? .front : .back)
+        return cameraVC
     }
 
-    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {
+        if (isFrontCamera && uiViewController.currentDevice?.position != .front) ||
+            (!isFrontCamera && uiViewController.currentDevice?.position != .back) {
+            uiViewController.switchCamera()
+        }
+    }
 }
 
 class CameraViewController: UIViewController {
     var captureSession: AVCaptureSession?
     var videoPreviewLayer: AVCaptureVideoPreviewLayer?
-
+    var currentDevice: AVCaptureDevice?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // 카메라 세션 초기화
+        setupCamera()
+    }
+    
+    func setupCamera() {
         captureSession = AVCaptureSession()
         guard let captureSession = captureSession else { return }
         
-        // 디바이스 설정
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
-        let videoInput: AVCaptureDeviceInput
+        currentDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) // 초기 카메라: 전면
+        guard let videoCaptureDevice = currentDevice else { return }
+        
         do {
-            videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
+            if captureSession.canAddInput(videoInput) {
+                captureSession.addInput(videoInput)
+            } else {
+                print("Unable to add video input.")
+            }
         } catch {
             print("Unable to access camera: \(error.localizedDescription)")
             return
         }
         
-        if captureSession.canAddInput(videoInput) {
-            captureSession.addInput(videoInput)
-        } else {
-            print("Unable to add video input.")
-            return
-        }
-
-        // 미리보기 레이어 설정
         videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         videoPreviewLayer?.videoGravity = .resizeAspectFill
         videoPreviewLayer?.frame = view.layer.bounds
         if let videoPreviewLayer = videoPreviewLayer {
             view.layer.addSublayer(videoPreviewLayer)
         }
-
-        // 카메라 세션 시작 (백그라운드 스레드에서 실행)
+        
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.captureSession?.startRunning()
         }
     }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        videoPreviewLayer?.frame = view.bounds
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        captureSession?.stopRunning()
+    
+    func switchCamera() {
+        guard let captureSession = captureSession, let currentDevice = currentDevice else { return }
+        captureSession.beginConfiguration()
+        
+        // 기존 입력 제거
+        if let currentInput = captureSession.inputs.first {
+            captureSession.removeInput(currentInput)
+        }
+        
+        // 전면/후면 카메라 전환
+        let newPosition: AVCaptureDevice.Position = currentDevice.position == .front ? .back : .front
+        if let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: newPosition) {
+            self.currentDevice = newDevice
+            do {
+                let newInput = try AVCaptureDeviceInput(device: newDevice)
+                if captureSession.canAddInput(newInput) {
+                    captureSession.addInput(newInput)
+                } else {
+                    print("Unable to add new video input.")
+                }
+            } catch {
+                print("Unable to switch camera: \(error.localizedDescription)")
+            }
+        }
+        
+        captureSession.commitConfiguration()
     }
 }
