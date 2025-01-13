@@ -11,7 +11,7 @@
 |<img src="https://github.com/user-attachments/assets/c947e8be-abd6-43c4-a499-fcf6865019b0" height="150" />|<img src="https://github.com/user-attachments/assets/5e9c396e-7589-4ac8-bfe5-dfe452d50178" height="150" />|<img src="https://github.com/user-attachments/assets/62ce1874-816d-4a5b-9c47-5cbcfd3a4d4b" height="150" />|<img src="https://github.com/user-attachments/assets/2640d161-4974-4f69-99d3-4342884dc93f" height="150" />|
 |:-:|:-:|:-:|:-:|
 |김민지<br/>[@min-minnn](https://github.com/min-minnn)|임정윤<br/>[@jzongyun](https://github.com/jzongyun)|유수현<br/>[@6suhyeon](https://github.com/6suhyeon)|문창현<br/>[@changdoong](https://github.com/changdoong)|
-|PM, Front-End|Front-End, UI Design|Back-End|AI
+|PM, Front-End|Front-End, UI Design|Back-End, DevOps|AI
 <br>
 
 ## ⚙️ 시스템 구성도 ⚙️
