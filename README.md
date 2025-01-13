@@ -115,6 +115,11 @@
 
 ## 🎨 Figma 🎨
 - [figma link](https://www.figma.com/design/l6RaATWN1euPsOVXy66qE4/%EB%B0%98%EC%98%A4%EC%8B%AD?node-id=0-1&t=qgGHWpCWcySMpXmq-1)
+<br>
+
+## 📝 정기회의 회의록 📝
+- [notion link](https://sapphire-dewberry-222.notion.site/11fe3708109e8152ab71f29220051b6d?pvs=4)
+<br>
 
 ## 🚨 회의 🚨
 - [3학년 2학기] 정기회의: 화요일 22시 30분
