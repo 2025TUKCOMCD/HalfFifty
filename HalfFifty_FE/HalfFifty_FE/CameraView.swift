@@ -52,8 +52,10 @@ class CameraViewController: UIViewController {
             view.layer.addSublayer(videoPreviewLayer)
         }
 
-        // 카메라 세션 시작
-        captureSession.startRunning()
+        // 카메라 세션 시작 (백그라운드 스레드에서 실행)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.captureSession?.startRunning()
+        }
     }
 
     override func viewDidLayoutSubviews() {
