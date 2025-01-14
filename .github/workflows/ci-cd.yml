@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
+          distribution: 'temurin'
+
 
       # Gradle 빌드 및 테스트 실행
       - name: Build and test with Gradle
@@ -45,6 +47,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
+          distribution: 'temurin'
 
       # Docker 이미지 빌드
       - name: Build Docker Image
