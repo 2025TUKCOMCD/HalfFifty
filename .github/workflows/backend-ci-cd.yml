@@ -27,9 +27,16 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: HalfFifty_BE
 
+      # Gradle 빌드 및 테스트
       - name: Build and Test
         working-directory: HalfFifty_BE
-        run: ./gradlew build
+        env:
+          DB_DRIVER_CLASS_NAME: ${{ secrets.DB_DRIVER_CLASS_NAME }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          ./gradlew clean build
 
   deploy:
     name: Deploy Backend
