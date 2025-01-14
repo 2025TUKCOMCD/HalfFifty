@@ -9,4 +9,4 @@ COPY ${JAR_FILE} app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 # 컨테이너가 사용할 포트
-EXPOSE 8080
+EXPOSE 8081
