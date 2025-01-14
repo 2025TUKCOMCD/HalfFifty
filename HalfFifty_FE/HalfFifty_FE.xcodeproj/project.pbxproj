@@ -6,8 +6,37 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C9270D712D36472E00BDFD97 /* HalfFifty_Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C9270D6F2D36472E00BDFD97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A5EAB71C2D2B6D2900FE064E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9270D632D36472C00BDFD97;
+			remoteInfo = "HalfFifty_Watch Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C9270D752D36472E00BDFD97 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C9270D712D36472E00BDFD97 /* HalfFifty_Watch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		A5EAB7242D2B6D2900FE064E /* HalfFifty_FE.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HalfFifty_FE.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HalfFifty_Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +45,22 @@
 			path = HalfFifty_FE;
 			sourceTree = "<group>";
 		};
+		C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "HalfFifty_Watch Watch App";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A5EAB7212D2B6D2900FE064E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9270D612D36472C00BDFD97 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				A5EAB7262D2B6D2900FE064E /* HalfFifty_FE */,
+				C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */,
 				A5EAB7252D2B6D2900FE064E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				A5EAB7242D2B6D2900FE064E /* HalfFifty_FE.app */,
+				C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,10 +98,12 @@
 				A5EAB7202D2B6D2900FE064E /* Sources */,
 				A5EAB7212D2B6D2900FE064E /* Frameworks */,
 				A5EAB7222D2B6D2900FE064E /* Resources */,
+				C9270D752D36472E00BDFD97 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C9270D702D36472E00BDFD97 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A5EAB7262D2B6D2900FE064E /* HalfFifty_FE */,
@@ -70,6 +115,28 @@
 			productReference = A5EAB7242D2B6D2900FE064E /* HalfFifty_FE.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C9270D632D36472C00BDFD97 /* HalfFifty_Watch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C9270D722D36472E00BDFD97 /* Build configuration list for PBXNativeTarget "HalfFifty_Watch Watch App" */;
+			buildPhases = (
+				C9270D602D36472C00BDFD97 /* Sources */,
+				C9270D612D36472C00BDFD97 /* Frameworks */,
+				C9270D622D36472C00BDFD97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */,
+			);
+			name = "HalfFifty_Watch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "HalfFifty_Watch Watch App";
+			productReference = C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -77,11 +144,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
 					A5EAB7232D2B6D2900FE064E = {
 						CreatedOnToolsVersion = 16.1;
+					};
+					C9270D632D36472C00BDFD97 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -100,12 +170,20 @@
 			projectRoot = "";
 			targets = (
 				A5EAB7232D2B6D2900FE064E /* HalfFifty_FE */,
+				C9270D632D36472C00BDFD97 /* HalfFifty_Watch Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A5EAB7222D2B6D2900FE064E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C9270D622D36472C00BDFD97 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +200,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C9270D602D36472C00BDFD97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C9270D702D36472E00BDFD97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9270D632D36472C00BDFD97 /* HalfFifty_Watch Watch App */;
+			targetProxy = C9270D6F2D36472E00BDFD97 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A5EAB7302D2B6D2A00FE064E /* Debug */ = {
@@ -252,7 +345,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_FE/Preview Content\"";
-				DEVELOPMENT_TEAM = 78678N7NGX;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "앱에서 카메라를 사용하기 위해 권한이 필요합니다.";
@@ -261,6 +354,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "halffifty.HalfFifty-FE";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -282,7 +376,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_FE/Preview Content\"";
-				DEVELOPMENT_TEAM = 78678N7NGX;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "앱에서 카메라를 사용하기 위해 권한이 필요합니다.";
@@ -291,6 +385,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "halffifty.HalfFifty-FE";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -301,6 +396,66 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C9270D732D36472E00BDFD97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_Watch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minji.HalfFifty-FE.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
+			};
+			name = Debug;
+		};
+		C9270D742D36472E00BDFD97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_Watch Watch App/Preview Content\"";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minji.HalfFifty-FE.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.2;
 			};
 			name = Release;
 		};
@@ -321,6 +476,15 @@
 			buildConfigurations = (
 				A5EAB7332D2B6D2A00FE064E /* Debug */,
 				A5EAB7342D2B6D2A00FE064E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C9270D722D36472E00BDFD97 /* Build configuration list for PBXNativeTarget "HalfFifty_Watch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C9270D732D36472E00BDFD97 /* Debug */,
+				C9270D742D36472E00BDFD97 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
