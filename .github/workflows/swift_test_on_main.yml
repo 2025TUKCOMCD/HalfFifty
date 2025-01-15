@@ -9,13 +9,13 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13  # 최신 macOS 환경
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set Xcode Version
-      run: sudo xcode-select -switch /Applications/Xcode_15.4.app  # 적합한 Xcode 버전 설정
+      run: sudo xcode-select -switch /Applications/Xcode.app
 
     - name: Install CocoaPods
       run: |
