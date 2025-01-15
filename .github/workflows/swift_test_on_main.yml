@@ -9,17 +9,23 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13
+    runs-on: macos-13  # 최신 macOS 환경
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set Xcode Version
-      run: sudo xcode-select -switch /Applications/Xcode_16.0.app
+      run: sudo xcode-select -switch /Applications/Xcode.app
 
     - name: Install CocoaPods
       run: |
         pod install --repo-update --clean-install --project-directory=HalfFifty_FE/
+
+    - name: Log Installed Xcode Version
+      run: xcodebuild -version
+
+    - name: Log CocoaPods Version
+      run: pod --version
 
     - name: Build and Test for iOS
       run: |
