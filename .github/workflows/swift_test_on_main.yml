@@ -9,13 +9,13 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13
+    runs-on: macos-13  # 최신 macOS 환경
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set Xcode Version
-      run: sudo xcode-select -switch /Applications/Xcode.app
+      run: sudo xcode-select -switch /Applications/Xcode_15.4.app  # 적합한 Xcode 버전 설정
 
     - name: Install CocoaPods
       run: |
@@ -29,8 +29,8 @@ jobs:
 
     - name: Debug Files
       run: |
-        ls -la HalfFifty_FE
-        tree HalfFifty_FE
+        ls -la
+        ls -R HalfFifty_FE
 
     - name: Check Project File
       run: cat HalfFifty_FE/HalfFifty_FE.xcodeproj/project.pbxproj
