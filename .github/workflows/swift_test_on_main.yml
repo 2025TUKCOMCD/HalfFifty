@@ -30,7 +30,6 @@ jobs:
     - name: Debug Files
       run: |
         ls -la
-        ls -R HalfFifty_FE
 
     - name: Check Project File
       run: cat HalfFifty_FE/HalfFifty_FE.xcodeproj/project.pbxproj
