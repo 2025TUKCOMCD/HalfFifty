@@ -46,6 +46,13 @@ jobs:
         working-directory: HalfFifty_BE
         run: ls -la build/libs/
 
+      # 빌드 결과물을 아티팩트로 업로드
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: HalfFifty_BE/build/libs/*.jar
+
   deploy:
     name: Deploy Backend
     needs: test
