@@ -44,23 +44,29 @@ jobs:
 
   deploy:
     name: Deploy Backend
-    needs: test  # 빌드/테스트가 성공해야 실행
-    if: github.ref == 'refs/heads/main'   # main 브랜치에서만 실행
+    needs: test
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
-      # 2.1 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2.2 JDK 17 설치
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 2.3 빌드된 JAR 파일을 EC2로 전송
+      - name: Verify JAR File
+        working-directory: HalfFifty_BE
+        run: |
+          ls -la build/libs/
+
+      - name: Set Permissions for JAR File
+        working-directory: HalfFifty_BE
+        run: chmod 644 build/libs/HalfFifty_BE-0.0.1-SNAPSHOT.jar
+
       - name: Upload JAR to EC2
         uses: appleboy/scp-action@v0.1.2
         with:
@@ -70,7 +76,6 @@ jobs:
           source: ./HalfFifty_BE/build/libs/HalfFifty_BE-0.0.1-SNAPSHOT.jar
           target: ~/HalfFifty_BE-0.0.1-SNAPSHOT.jar
 
-      # 2.4 EC2에서 Docker Compose로 배포 실행
       - name: Deploy to EC2 using Docker Compose
         uses: appleboy/ssh-action@v0.1.2
         with:
@@ -81,3 +86,4 @@ jobs:
             cd ~
             docker-compose down || true
             docker-compose up -d --build
+
