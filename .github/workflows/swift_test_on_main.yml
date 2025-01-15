@@ -9,10 +9,14 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set Xcode Version
+      run: sudo xcode-select -switch /Applications/Xcode_16.0.app
+
     - name: Install CocoaPods
       run: |
         pod install --repo-update --clean-install --project-directory=HalfFifty_FE/
