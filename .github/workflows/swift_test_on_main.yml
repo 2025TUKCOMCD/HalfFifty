@@ -40,7 +40,7 @@ jobs:
         xcodebuild clean test \
           -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
           -scheme HalfFifty_FE \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+          -destination 'platform=iOS Simulator,OS=latest' \
           -verbose
 
     - name: Build and Test for watchOS
@@ -48,5 +48,5 @@ jobs:
         xcodebuild clean test \
           -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
           -scheme "HalfFifty_Watch Watch App" \
-          -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest' \
+          -destination 'platform=watchOS Simulator,OS=latest' \
           -verbose
