@@ -28,5 +28,5 @@ jobs:
       run: |
         xcodebuild clean test \
           -project HalfFifty_FE/HalfFifty_FE.xcodeproj \
-          -scheme HalfFifty_Watch Watch App \
+          -scheme "HalfFifty_Watch Watch App" \
           -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest'
