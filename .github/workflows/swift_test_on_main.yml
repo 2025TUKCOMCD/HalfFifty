@@ -18,7 +18,7 @@ jobs:
 
     - name: Install CocoaPods
       run: |
-        pod install --repo-update --clean-install --project-directory=HalfFifty_FE/ || exit 1
+        pod install --repo-update --clean-install --workspace-directory=HalfFifty_FE/ || exit 1
 
     - name: Log Installed Xcode Version
       run: xcodebuild -version
