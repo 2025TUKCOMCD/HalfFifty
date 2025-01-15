@@ -9,17 +9,17 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13  # 최신 macOS 환경
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Set Xcode Version
-      run: sudo xcode-select -switch /Applications/Xcode.app
+      run: sudo xcode-select -switch /Applications/Xcode_16.0.app  # 적합한 Xcode 버전 설정
 
     - name: Install CocoaPods
       run: |
-        pod install --repo-update --clean-install --project-directory=HalfFifty_FE/
+        pod install --repo-update --clean-install --project-directory=HalfFifty_FE/ || exit 1
 
     - name: Log Installed Xcode Version
       run: xcodebuild -version
@@ -27,16 +27,26 @@ jobs:
     - name: Log CocoaPods Version
       run: pod --version
 
+    - name: Debug Files
+      run: |
+        ls -la HalfFifty_FE
+        tree HalfFifty_FE
+
+    - name: Check Project File
+      run: cat HalfFifty_FE/HalfFifty_FE.xcodeproj/project.pbxproj
+
     - name: Build and Test for iOS
       run: |
         xcodebuild clean test \
           -project HalfFifty_FE/HalfFifty_FE.xcodeproj \
           -scheme HalfFifty_FE \
-          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest'
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+          -verbose
 
     - name: Build and Test for watchOS
       run: |
         xcodebuild clean test \
           -project HalfFifty_FE/HalfFifty_FE.xcodeproj \
           -scheme "HalfFifty_Watch Watch App" \
-          -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest'
+          -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest' \
+          -verbose
