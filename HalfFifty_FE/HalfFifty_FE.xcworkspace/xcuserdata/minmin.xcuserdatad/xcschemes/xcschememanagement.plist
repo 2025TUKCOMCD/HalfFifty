@@ -3,18 +3,20 @@
 <plist version="1.0">
 <dict>
 	<key>SchemeUserState</key>
-	<dict/>
-	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>A5EAB7232D2B6D2900FE064E</key>
+		<key>HalfFifty_FE.xcscheme_^#shared#^_</key>
 		<dict>
-			<key>primary</key>
+			<key>isShown</key>
 			<true/>
+			<key>orderHint</key>
+			<integer>3</integer>
 		</dict>
-		<key>C9270D632D36472C00BDFD97</key>
+		<key>HalfFifty_Watch Watch App.xcscheme_^#shared#^_</key>
 		<dict>
-			<key>primary</key>
+			<key>isShown</key>
 			<true/>
+			<key>orderHint</key>
+			<integer>4</integer>
 		</dict>
 	</dict>
 </dict>
