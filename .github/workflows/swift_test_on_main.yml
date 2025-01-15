@@ -20,13 +20,13 @@ jobs:
     - name: Build and Test for iOS
       run: |
         xcodebuild clean test \
-          -workspace HalfFifty_FE/HalfFifty_FE.xcodeproj \
+          -project HalfFifty_FE/HalfFifty_FE.xcodeproj \
           -scheme HalfFifty_FE \
           -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest'
 
     - name: Build and Test for watchOS
       run: |
         xcodebuild clean test \
-          -workspace HalfFifty_FE/HalfFifty_FE.xcodeproj \
+          -project HalfFifty_FE/HalfFifty_FE.xcodeproj \
           -scheme HalfFifty_Watch Watch App \
           -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest'
