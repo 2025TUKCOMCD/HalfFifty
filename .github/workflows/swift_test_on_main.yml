@@ -37,7 +37,7 @@ jobs:
 
     - name: Build and Test for iOS
       run: |
-        xcodebuild clean test \
+        xcodebuild test \
           -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
           -scheme HalfFifty_FE \
           -destination 'platform=iOS Simulator,OS=latest' \
@@ -45,7 +45,7 @@ jobs:
 
     - name: Build and Test for watchOS
       run: |
-        xcodebuild clean test \
+        xcodebuild test \
           -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
           -scheme "HalfFifty_Watch Watch App" \
           -destination 'platform=watchOS Simulator,OS=latest' \
