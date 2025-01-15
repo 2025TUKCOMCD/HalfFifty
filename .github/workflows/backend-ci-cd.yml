@@ -51,6 +51,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
+          path: HalfFifty_BE/build/libs/*.jar
+
 
   deploy:
     name: Deploy Backend
