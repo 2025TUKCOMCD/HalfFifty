@@ -42,6 +42,10 @@ jobs:
         run: |
           ./gradlew clean build
 
+      - name: Verify JAR File
+        working-directory: HalfFifty_BE
+        run: ls -la build/libs/
+
   deploy:
     name: Deploy Backend
     needs: test
