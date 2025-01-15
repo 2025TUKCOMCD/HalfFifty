@@ -51,7 +51,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          path: HalfFifty_BE/build/libs/*.jar
 
   deploy:
     name: Deploy Backend
@@ -76,12 +75,10 @@ jobs:
 
       - name: Verify JAR File
         working-directory: HalfFifty_BE
-        run: |
-          ls -la build/libs/
+        run: ls -la /home/runner/work/HalfFifty/HalfFifty
 
       - name: Set Permissions for JAR File
-        working-directory: HalfFifty_BE
-        run: chmod 644 build/libs/HalfFifty_BE-0.0.1-SNAPSHOT.jar
+        run: chmod 644 /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
 
       - name: Upload JAR to EC2
         uses: appleboy/scp-action@v0.1.2
@@ -89,7 +86,7 @@ jobs:
           host: ${{ secrets.AWS_IP }}
           username: ${{ secrets.AWS_USER }}
           key: ${{ secrets.AWS_KEY }}
-          source: ./HalfFifty_BE/build/libs/HalfFifty_BE-0.0.1-SNAPSHOT.jar
+          source: /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
           target: ~/HalfFifty_BE-0.0.1-SNAPSHOT.jar
 
       - name: Deploy to EC2 using Docker Compose
