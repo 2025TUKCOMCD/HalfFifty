@@ -1,0 +1,32 @@
+name: Swift Run Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install CocoaPods
+      run: |
+        pod install --repo-update --clean-install --project-directory=HalfFifty_FE/
+
+    - name: Build and Test for iOS
+      run: |
+        xcodebuild clean test \
+          -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
+          -scheme HalfFifty_FE \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest'
+
+    - name: Build and Test for watchOS
+      run: |
+        xcodebuild clean test \
+          -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
+          -scheme HalfFifty_Watch Watch App \
+          -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest'
