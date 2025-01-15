@@ -46,15 +46,11 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A5EAB7262D2B6D2900FE064E /* HalfFifty_FE */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = HalfFifty_FE;
 			sourceTree = "<group>";
 		};
 		C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "HalfFifty_Watch Watch App";
 			sourceTree = "<group>";
 		};
@@ -113,7 +109,6 @@
 				588071A65175D135D5607050 /* Pods-HalfFifty_FE.debug.xcconfig */,
 				648D7711C03ECCDD7DCC700E /* Pods-HalfFifty_FE.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

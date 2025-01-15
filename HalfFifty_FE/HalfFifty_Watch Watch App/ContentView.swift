@@ -36,7 +36,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.5))
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
                 }
                 .buttonStyle(PlainButtonStyle())
                 
@@ -57,7 +57,7 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.5))
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
                 }
                 .buttonStyle(PlainButtonStyle())
             }
