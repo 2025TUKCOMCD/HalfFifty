@@ -8,6 +8,58 @@ on:
 
 jobs:
   build:
+    runs-on: macos-13  # 최신 macOS 환경
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set Xcode Version
+      run: sudo xcode-select -switch /Applications/Xcode.app
+
+    - name: Install CocoaPods
+      run: |
+        pod install --repo-update --clean-install --project-directory=HalfFifty_FE/ || exit 1
+
+    - name: Log Installed Xcode Version
+      run: xcodebuild -version
+
+    - name: Log CocoaPods Version
+      run: pod --version
+
+    - name: Debug Files
+      run: |
+        ls -la
+        ls -R HalfFifty_FE
+
+    - name: List Available Schemes in Workspace
+      run: |
+        xcodebuild -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace -list
+
+    - name: Build and Test for iOS
+      run: |
+        xcodebuild clean test \
+          -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
+          -scheme HalfFifty_FE \
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+          -verbose
+
+    - name: Build and Test for watchOS
+      run: |
+        xcodebuild clean test \
+          -workspace HalfFifty_FE/HalfFifty_FE.xcworkspace \
+          -scheme "HalfFifty_Watch Watch App" \
+          -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 - 45mm,OS=latest' \
+          -verbose
+name: Swift Run Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
 
     runs-on: macos-13
 
