@@ -90,7 +90,7 @@ jobs:
 
       # 6. JAR 파일 EC2로 업로드
       - name: Upload JAR to EC2
-        uses: appleboy/scp-action@v0.1.2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.AWS_IP }}
           username: ${{ secrets.AWS_USER }}
@@ -100,7 +100,7 @@ jobs:
 
       # 7. Docker Compose를 사용하여 EC2에서 배포
       - name: Deploy to EC2 using Docker Compose
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.AWS_IP }}
           username: ${{ secrets.AWS_USER }}
