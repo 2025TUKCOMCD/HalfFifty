@@ -42,8 +42,10 @@ struct MainView: View {
                     Spacer()
                     
                     // 로고
-                    Text("手다쟁이")
-                        .font(.system(size: 15))
+                    Image("text.logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 57.0, height: 15.0)
                     
                     Spacer()
                     
