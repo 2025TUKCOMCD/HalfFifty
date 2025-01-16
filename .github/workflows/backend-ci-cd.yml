@@ -80,7 +80,7 @@ jobs:
 
       # 4. JAR 파일 확인
       - name: Verify JAR File
-        run: ls -la /home/runner/work/HalfFifty/HalfFifty
+        run: ls -la /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
 
       # 5. SSH 키 파일 생성 및 권한 설정
       - name: Set permissions for private key
@@ -88,7 +88,12 @@ jobs:
           echo "${{ secrets.AWS_KEY }}" > HalfFifty.pem
           chmod 600 HalfFifty.pem
 
-      # 6. JAR 파일 EC2로 업로드
+      # 6. SSH 연결 테스트
+      - name: Test SSH Connection
+        run: |
+          ssh -i HalfFifty.pem ubuntu@${{ secrets.AWS_IP }} "echo 'SSH connection successful'"
+
+      # 7. JAR 파일 EC2로 업로드
       - name: Upload JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -98,7 +103,7 @@ jobs:
           source: /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
           target: ~/HalfFifty_BE-0.0.1-SNAPSHOT.jar
 
-      # 7. Docker Compose를 사용하여 EC2에서 배포
+      # 8. Docker Compose를 사용하여 EC2에서 배포
       - name: Deploy to EC2 using Docker Compose
         uses: appleboy/ssh-action@v1.2.0
         with:
