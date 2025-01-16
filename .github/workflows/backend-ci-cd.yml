@@ -87,13 +87,14 @@ jobs:
       # 5. SSH 키 파일 생성 및 권한 설정
       - name: Set permissions for private key
         run: |
-          echo "${{ secrets.AWS_KEY }}" > HalfFifty.pem
-          chmod 600 HalfFifty.pem
+          echo "${{ secrets.AWS_KEY }}" > ${{ github.workspace }}/HalfFifty.pem
+          chmod 600 ${{ github.workspace }}/HalfFifty.pem
 
       # 6. SSH 연결 테스트
       - name: Test SSH Connection
         run: |
           ssh -i HalfFifty.pem ubuntu@${{ secrets.AWS_IP }} "echo 'SSH connection successful'"
+
 
       # 7. JAR 파일 EC2로 업로드
       - name: Upload JAR to EC2
@@ -101,9 +102,15 @@ jobs:
         with:
           host: ${{ secrets.AWS_IP }}
           username: ${{ secrets.AWS_USER }}
-          key: HalfFifty.pem
+          key: ${{ github.workspace }}/HalfFifty.pem
           source: /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
           target: ~/HalfFifty_BE-0.0.1-SNAPSHOT.jar
+          debug: true
+
+      - name: Debug Key File
+        run: |
+          ls -la ${{ github.workspace }}/HalfFifty.pem
+          cat ${{ github.workspace }}/HalfFifty.pem       
 
       # 8. Docker Compose를 사용하여 EC2에서 배포
       - name: Deploy to EC2 using Docker Compose
@@ -111,7 +118,7 @@ jobs:
         with:
           host: ${{ secrets.AWS_IP }}
           username: ${{ secrets.AWS_USER }}
-          key: HalfFifty.pem
+          key: ${{ github.workspace }}/HalfFifty.pem
           script: |
             cd ~
             docker-compose down || true
