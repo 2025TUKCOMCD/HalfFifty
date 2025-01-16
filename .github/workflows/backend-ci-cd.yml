@@ -78,9 +78,11 @@ jobs:
         with:
           name: build-artifact
 
-      # 4. JAR 파일 확인
-      - name: Verify JAR File
-        run: ls -la /home/runner/work/HalfFifty/HalfFifty/HalfFifty_BE-0.0.1-SNAPSHOT.jar
+      # 4. 호스트 키 등록
+      - name: Add Host Key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.AWS_IP }} >> ~/.ssh/known_hosts
 
       # 5. SSH 키 파일 생성 및 권한 설정
       - name: Set permissions for private key
