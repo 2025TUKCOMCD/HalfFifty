@@ -61,6 +61,11 @@
 <img width="1224" alt="image" src="https://github.com/user-attachments/assets/56f97062-ba6e-439c-8cf3-f72c6a48d5e2" />
 <br>
 
+## 📍 Branch 전략 📍
+- main: 배포용 브랜치
+- develop: 기능 개발을 위한 브랜치
+<br>
+
 ## ✔️ Git Commit Mesage Convention ✔️
 <ol>
   <li>
