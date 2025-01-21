@@ -46,6 +46,7 @@ struct MainView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 57.0, height: 15.0)
+                        .shadow(radius: 0)
                     
                     Spacer()
                     
@@ -58,7 +59,7 @@ struct MainView: View {
                 .padding(.horizontal, 20)
                 .frame(width: geometry.size.width)
                 .background(Color.white)
-                .shadow(radius: 4)
+                .shadow(radius: 1)
                 
                 // body
                 VStack {
@@ -128,7 +129,7 @@ struct MainView: View {
                         .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .cornerRadius(8)
-                        .shadow(radius: 4)
+                        .shadow(radius: 2)
                     }
                     
                     // 카메라 영역
@@ -184,12 +185,14 @@ struct MainView: View {
                                         Button(action: {
                                             self.onCamera = true
                                         }) {
-                                            Image(systemName: "video.fill")
-                                                .padding(.vertical, 13)
-                                                .padding(.horizontal, 9)
-                                                .background(Color.white)
-                                                .foregroundColor(Color.blue)
-                                                .cornerRadius(50)
+                                            ZStack {
+                                                Circle()
+                                                    .fill(.white)
+                                                    .frame(width: 40, height: 40)
+                                                
+                                                Image(systemName: "video.fill")
+                                                    .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                            }
                                         }
                                         .padding(.bottom, 20)
                                     }
@@ -208,12 +211,14 @@ struct MainView: View {
                                     Button(action: {
                                         self.isFrontCamera.toggle() // 상태 변경
                                     }) {
-                                        Image(systemName: "repeat")
-                                            .padding(.vertical, 13)
-                                            .padding(.horizontal, 11)
-                                            .background(Color.white)
-                                            .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                            .cornerRadius(50)
+                                        ZStack {
+                                            Circle()
+                                                .fill(.white)
+                                                .frame(width: 40, height: 40)
+                                            
+                                            Image(systemName: "repeat")
+                                                .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                        }
                                     }
                                     .padding(.bottom, 20) // 버튼과 하단 사이의 간격을 조정
                                 }
@@ -249,12 +254,13 @@ struct MainView: View {
                                 self.useMicrophone = !self.useMicrophone
                             }) {
                                 // 버튼 스타일
-                                Image(systemName: self.useMicrophone ? "waveform" : "microphone.fill")
-                                    .padding(.vertical, 8)
-                                    .padding(self.useMicrophone ? .horizontal : .horizontal, self.useMicrophone ? 8.5 : 9.5)
-                                    .foregroundColor(.white)
-                                    .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                    .cornerRadius(50)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: self.useMicrophone ? "waveform" : "microphone.fill")                      .foregroundColor(.white)
+                                }
                             }
                         }
                         .padding([.top, .leading, .trailing], 20)
