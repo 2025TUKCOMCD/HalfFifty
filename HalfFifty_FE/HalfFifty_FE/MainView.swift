@@ -26,39 +26,52 @@ struct MainView: View {
         GeometryReader { geometry in
             VStack {
                 // Header
-                HStack {
-                    // 햄버거 버튼
-                    Button(action: {
-                        // 버튼 클릭 시
-                        withAnimation {
-                            self.showMenuView = true
+                ZStack {
+                    // 배경과 그림자만 포함
+                    Color.white
+                        .frame(width: geometry.size.width, height: 56)
+                        .overlay(
+                            Rectangle()
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.black.opacity(0.1), Color.clear]),
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(height: 3), // 그림자 영역 높이
+                            alignment: .bottom
+                        )
+                    
+                    HStack {
+                        // 햄버거 버튼
+                        Button(action: {
+                            // 버튼 클릭 시
+                            withAnimation {
+                                self.showMenuView = true
+                            }
+                        }) {
+                            // 버튼 스타일
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.black)
                         }
-                    }) {
-                        // 버튼 스타일
-                        Image(systemName: "line.3.horizontal")
-                            .foregroundColor(.black)
+                        
+                        Spacer()
+                        
+                        // 로고
+                        Image("text.logo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 57.0, height: 15.0)
+                        
+                        Spacer()
+                        
+                        // 정렬을 위한 빈 투명 영역 추가
+                        Color.clear
+                            .frame(width: 24, height: 24)
                     }
-                    
-                    Spacer()
-                    
-                    // 로고
-                    Image("text.logo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 57.0, height: 15.0)
-                    
-                    Spacer()
-                    
-                    // 정렬을 위한 빈 투명 영역 추가
-                    Color.clear
-                        .frame(width: 24, height: 24)
+                    .padding(.horizontal, 20)
                 }
-                .padding(.top, 10)
-                .padding(.bottom, 22)
-                .padding(.horizontal, 20)
-                .frame(width: geometry.size.width)
-                .background(Color.white)
-                .shadow(radius: 4)
                 
                 // body
                 VStack {
@@ -128,7 +141,7 @@ struct MainView: View {
                         .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .cornerRadius(8)
-                        .shadow(radius: 4)
+                        .shadow(radius: 2)
                     }
                     
                     // 카메라 영역
@@ -184,12 +197,14 @@ struct MainView: View {
                                         Button(action: {
                                             self.onCamera = true
                                         }) {
-                                            Image(systemName: "video.fill")
-                                                .padding(.vertical, 13)
-                                                .padding(.horizontal, 9)
-                                                .background(Color.white)
-                                                .foregroundColor(Color.blue)
-                                                .cornerRadius(50)
+                                            ZStack {
+                                                Circle()
+                                                    .fill(.white)
+                                                    .frame(width: 40, height: 40)
+                                                
+                                                Image(systemName: "video.fill")
+                                                    .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                            }
                                         }
                                         .padding(.bottom, 20)
                                     }
@@ -208,12 +223,14 @@ struct MainView: View {
                                     Button(action: {
                                         self.isFrontCamera.toggle() // 상태 변경
                                     }) {
-                                        Image(systemName: "repeat")
-                                            .padding(.vertical, 13)
-                                            .padding(.horizontal, 11)
-                                            .background(Color.white)
-                                            .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                            .cornerRadius(50)
+                                        ZStack {
+                                            Circle()
+                                                .fill(.white)
+                                                .frame(width: 40, height: 40)
+                                            
+                                            Image(systemName: "repeat")
+                                                .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                        }
                                     }
                                     .padding(.bottom, 20) // 버튼과 하단 사이의 간격을 조정
                                 }
@@ -249,12 +266,13 @@ struct MainView: View {
                                 self.useMicrophone = !self.useMicrophone
                             }) {
                                 // 버튼 스타일
-                                Image(systemName: self.useMicrophone ? "waveform" : "microphone.fill")
-                                    .padding(.vertical, 8)
-                                    .padding(self.useMicrophone ? .horizontal : .horizontal, self.useMicrophone ? 8.5 : 9.5)
-                                    .foregroundColor(.white)
-                                    .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
-                                    .cornerRadius(50)
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Image(systemName: self.useMicrophone ? "waveform" : "microphone.fill")                      .foregroundColor(.white)
+                                }
                             }
                         }
                         .padding([.top, .leading, .trailing], 20)

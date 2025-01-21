@@ -32,7 +32,7 @@ struct ContentView: View {
                         // 메뉴 표시 여부 바인딩
                         MainView(showMenuView: $showMenuView)
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .disabled(self.showMenuView ? true : false) // 메뉴 표시되어 있는 상태면 메인 뷰 기능 비활성화
+                            .disabled(self.showMenuView) // 메뉴 표시 상태면 메인 뷰 비활성화
                         
                         if self.showMenuView {
                             // 반투명한 배경 추가 (MenuView 외부 터치 감지)
@@ -43,17 +43,19 @@ struct ContentView: View {
                                         self.showMenuView = false
                                     }
                                 }
-                            
+                                .zIndex(1) // MenuView보다 뒤로 배치
+
                             // MenuView 추가
                             MenuView()
-                                .frame(width: geometry.size.width / 1.5) // 메인 뷰 위에 1.5만큼만 오픈
-                                .transition(.move(edge: .leading).combined(with: .opacity)) // 부드럽게 메뉴 열기
+                                .frame(width: geometry.size.width / 1.5)
+                                .transition(.move(edge: .leading).combined(with: .opacity))
+                                .zIndex(2) // 항상 최상위에 있도록 설정
                         }
                     } else {
                         SplashView()
                             .onAppear {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                                    withAnimation { // 시작 애니메이션도 동일한 속도로 설정
+                                    withAnimation {
                                         self.showMainView = true
                                     }
                                 }
