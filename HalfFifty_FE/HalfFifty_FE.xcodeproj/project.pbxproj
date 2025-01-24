@@ -43,6 +43,16 @@
 		C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HalfFifty_Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A5D587152D4415C300828796 /* Exceptions for "HalfFifty_Watch Watch App" folder in "HalfFifty_Watch Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"HalfFifty-Watch-Watch-App-Info.plist",
+			);
+			target = C9270D632D36472C00BDFD97 /* HalfFifty_Watch Watch App */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A5EAB7262D2B6D2900FE064E /* HalfFifty_FE */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -51,6 +61,9 @@
 		};
 		C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A5D587152D4415C300828796 /* Exceptions for "HalfFifty_Watch Watch App" folder in "HalfFifty_Watch Watch App" target */,
+			);
 			path = "HalfFifty_Watch Watch App";
 			sourceTree = "<group>";
 		};
@@ -392,7 +405,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_FE/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 78678N7NGX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "앱에서 카메라를 사용하기 위해 권한이 필요합니다.";
@@ -421,6 +434,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_FE/Preview Content\"";
@@ -441,6 +455,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.minji.HalfFifty-FE";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -455,9 +470,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HalfFifty_Watch Watch App/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 78678N7NGX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HalfFifty-Watch-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
@@ -488,6 +504,7 @@
 				DEVELOPMENT_TEAM = 78678N7NGX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HalfFifty-Watch-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
