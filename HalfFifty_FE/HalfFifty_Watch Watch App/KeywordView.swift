@@ -8,30 +8,28 @@
 import SwiftUI
 
 struct KeywordView: View {
-    @State private var keywords = ["김민지", "김먼지", "김망디", "김망디령이", "김민지"]
+    @State private var keywords = ["김민지", "김먼지", "김망디", "김망디렁이"]
 
     var body: some View {
-        NavigationView {
-            VStack {
-                List {
-                    ForEach(keywords, id: \.self) { keyword in
-                        Text(keyword)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    deleteKeyword(keyword: keyword)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                .tint(.red)
+        VStack {
+            List {
+                ForEach(keywords, id: \.self) { keyword in
+                    Text(keyword)
+                        .font(.title3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                deleteKeyword(keyword: keyword)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
-                    }
+                            .tint(.red)
+                        }
                 }
-                .listStyle(PlainListStyle())
             }
-            .navigationTitle("키워드 관리")
+            .listStyle(PlainListStyle())
         }
+        .navigationTitle("키워드 관리")
     }
 
     private func deleteKeyword(keyword: String) {
@@ -41,6 +39,8 @@ struct KeywordView: View {
 
 struct KeywordView_Previews: PreviewProvider {
     static var previews: some View {
-        KeywordView()
+        NavigationView {
+            KeywordView()
+        }
     }
 }
