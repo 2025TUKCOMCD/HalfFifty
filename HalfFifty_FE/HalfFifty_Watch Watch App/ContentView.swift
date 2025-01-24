@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var inputText: String = ""
     var body: some View {
         NavigationView {
                 VStack(spacing: 5) {
-                    NavigationLink(destination: VoiceTransformView()) {
+                    TextFieldLink(prompt: Text("음성을 녹음해주세요")) {
                         HStack(spacing: 8) {
                             ZStack {
                                 Circle()
@@ -27,6 +28,8 @@ struct ContentView: View {
                         }
                         .padding()
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
+                    } onSubmit: { newText in
+                        inputText = newText
                     }
                     .buttonStyle(PlainButtonStyle())
                     
