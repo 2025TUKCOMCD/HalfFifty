@@ -1,6 +1,6 @@
-platform :ios, '14.0' # 적절한 iOS 버전을 지정
+platform :ios, '14.0'
 use_frameworks!
 
 target 'HalfFifty_FE' do
-  pod 'MediaPipeTasksVision', '~> 0.10.0'
+  pod 'MediaPipeTasksVision'
 end
