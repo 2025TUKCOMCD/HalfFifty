@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "hand_landmarker.task",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
