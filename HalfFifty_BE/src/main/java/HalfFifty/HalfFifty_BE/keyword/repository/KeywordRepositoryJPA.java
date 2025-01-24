@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface KeywordRepositoryJPA extends JpaRepository<KeywordDAO, UUID> {
+    KeywordDAO findByUserIdAndKeywordId(UUID userId, UUID keywordId);
 }
