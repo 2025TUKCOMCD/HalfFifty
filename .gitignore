@@ -1,3 +1,5 @@
 # CocoaPods
 Pods/
 *.xcworkspace
+*.xcuserdata
+*.xcuserdatad
