@@ -1,6 +1,7 @@
 package HalfFifty.HalfFifty_BE.keyword.controller;
 
 import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeyWordUpdateDTO;
+import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeywordDeleteDTO;
 import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeywordSaveDTO;
 import HalfFifty.HalfFifty_BE.keyword.service.KeywordService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,21 @@ public class KeywordController {
         requestMap.put("success", success);
         requestMap.put("message", success ? "키워드 수정 성공" : "키워드 수정 시 DAO 저장 실패");
         requestMap.put("keywordId", keywordId);
+
+        // status, body 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+    }
+
+    // 키워드 삭제 API
+    @DeleteMapping
+    public ResponseEntity<Map<String, Object>> deleteKeyword(@RequestBody RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
+        // 키워드 삭제 service
+        Boolean success = keywordService.deleteKeyword(requestKeywordDeleteDTO);
+
+        // Map을 통해 메시지 값 json 데이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "키워드 삭제 성공" : "키워드 삭제 실패");
 
         // status, body 설정해서 응답 리턴
         return ResponseEntity.status(HttpStatus.OK).body(requestMap);
