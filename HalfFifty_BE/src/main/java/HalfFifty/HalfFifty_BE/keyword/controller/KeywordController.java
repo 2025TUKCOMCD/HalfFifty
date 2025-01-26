@@ -3,6 +3,7 @@ package HalfFifty.HalfFifty_BE.keyword.controller;
 import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeyWordUpdateDTO;
 import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeywordDeleteDTO;
 import HalfFifty.HalfFifty_BE.keyword.domain.DTO.RequestKeywordSaveDTO;
+import HalfFifty.HalfFifty_BE.keyword.domain.DTO.ResponseKeywordGetDTO;
 import HalfFifty.HalfFifty_BE.keyword.service.KeywordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,6 +24,25 @@ public class KeywordController {
     @Autowired
     public KeywordController(KeywordService keywordService) {
         this.keywordService = keywordService;
+    }
+
+    // 키워드 전체조회 API
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Map<String, Object>> getKeywordAll(@PathVariable("userId") UUID userId) {
+        // 키워드 조회 service
+        List<ResponseKeywordGetDTO> responseKeywordGetDTOS = keywordService.getKeywordAll(userId);
+
+        // 키워드 조회 여부
+        boolean success = responseKeywordGetDTOS != null;
+
+        // Map을 통해 메시지와 list 값 json 데이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "키워드 조회 성공" : "키워드 조회 실패");
+        requestMap.put("keywordList", responseKeywordGetDTOS);
+
+        // status, body 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
     }
 
     // 키워드 등록 API
