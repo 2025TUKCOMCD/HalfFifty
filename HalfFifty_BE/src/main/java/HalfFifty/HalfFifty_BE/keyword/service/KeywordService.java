@@ -45,7 +45,7 @@ public class KeywordService {
     }
 
     // 키워드 삭제 API
-    public Boolean deleteKeyword(RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
+    public boolean deleteKeyword(RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
         return deleteKeywordBean.exec(requestKeywordDeleteDTO);
     }
 }
