@@ -18,10 +18,10 @@ public class DeleteKeywordBean {
         this.deleteKEywordDAOBean = deleteKEywordDAOBean;
     }
 
-    public Boolean exec(RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
+    public boolean exec(RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
         // 유저 id와 키워드 id를 통해 원하는 객체 찾음
         KeywordDAO keywordDAO = getKeywordDAOBean.exec(requestKeywordDeleteDTO.getUserId(), requestKeywordDeleteDTO.getKeywordId());
-        if(keywordDAO == null) return null;
+        if(keywordDAO == null) return false;
 
         // 키워드 객체 삭제
         deleteKEywordDAOBean.exec(keywordDAO);

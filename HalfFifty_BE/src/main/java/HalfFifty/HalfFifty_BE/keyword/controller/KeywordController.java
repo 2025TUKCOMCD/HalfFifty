@@ -87,7 +87,7 @@ public class KeywordController {
     @DeleteMapping
     public ResponseEntity<Map<String, Object>> deleteKeyword(@RequestBody RequestKeywordDeleteDTO requestKeywordDeleteDTO) {
         // 키워드 삭제 service
-        Boolean success = keywordService.deleteKeyword(requestKeywordDeleteDTO);
+        boolean success = keywordService.deleteKeyword(requestKeywordDeleteDTO);
 
         // Map을 통해 메시지 값 json 데이터로 변환
         Map<String, Object> requestMap = new HashMap<>();
