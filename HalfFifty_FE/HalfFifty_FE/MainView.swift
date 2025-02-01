@@ -298,7 +298,9 @@ struct MainView: View {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         switch status {
         case .authorized:
-            self.useCamera = true
+            DispatchQueue.main.async {
+                self.useCamera = true
+            }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
@@ -306,9 +308,15 @@ struct MainView: View {
                 }
             }
         case .denied, .restricted:
-            self.useCamera = false
+            DispatchQueue.main.async {
+                self.useCamera = false
+                self.onCamera = false
+            }
         @unknown default:
-            self.useCamera = false
+            DispatchQueue.main.async {
+                self.useCamera = false
+                self.onCamera = false
+            }
         }
     }
 
