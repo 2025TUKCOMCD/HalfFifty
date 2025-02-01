@@ -186,7 +186,7 @@ struct MainView: View {
                                         .foregroundColor(Color.blue)
                                         .cornerRadius(8)
                                         .padding(.bottom, 20)
-                                    } else if !onCamera {
+                                    } else if !self.onCamera {
                                         Button(action: {
                                             self.onCamera = true
                                         }) {
