@@ -72,7 +72,7 @@ struct MainView: View {
                 VStack {
                     VStack {
                         HStack(alignment: .center) {
-                            if self.changeTosignLanguage {
+                            if self.changeToSignLanguage {
                                 Text("수어")
                                     .font(.system(size: 20))
                                     .frame(width: 75)
@@ -95,8 +95,7 @@ struct MainView: View {
                             
                             // 번역 전환 버튼
                             Button(action: {
-                                // 버튼 클릭 시
-                                self.changeTosignLanguage = !self.changeTosignLanguage
+                                self.changeToSignLanguage.toggle()
                             }) {
                                 // 버튼 스타일
                                 Image(systemName: "arrow.left.arrow.right")
@@ -110,7 +109,7 @@ struct MainView: View {
                             
                             Spacer()
                             
-                            if self.changeTosignLanguage {
+                            if self.changeToSignLanguage {
                                 // 번역어 선택
                                 Button(action: {
                                     // 버튼 클릭 시
@@ -139,7 +138,7 @@ struct MainView: View {
                     }
                     
                     // 카메라 영역
-                    if self.changeTosignLanguage {
+                    if self.changeToSignLanguage {
                         ZStack {
                             if self.useCamera && self.onCamera {
                                 CameraView(isFrontCamera: $isFrontCamera)
