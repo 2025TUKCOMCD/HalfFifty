@@ -16,6 +16,7 @@ struct MainView: View {
     @State private var changeToSignLanguage: Bool = true // 번역 방향 여부
     @State private var text: String = "" // 번역할 문장
     @State var useMicrophone: Bool = false // 음성 입력 사용 여부
+    @State private var cameraFrame: CGRect = .zero // 카메라 크기 저장
 
     var body: some View {
         GeometryReader { geometry in
@@ -141,10 +142,19 @@ struct MainView: View {
                     if self.changeToSignLanguage {
                         ZStack {
                             if self.useCamera && self.onCamera {
-                                CameraView(isFrontCamera: $isFrontCamera)
+                                CameraView(isFrontCamera: $isFrontCamera, cameraFrame: $cameraFrame)
                                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                     .cornerRadius(8)
                                     .shadow(radius: 2)
+                                    .background(GeometryReader { proxy in
+                                        Color.clear
+                                            .onAppear {
+                                                cameraFrame = proxy.frame(in: .global) // 초기 크기 저장
+                                            }
+                                            .onChange(of: proxy.size) { oldSize, newSize in
+                                                cameraFrame = proxy.frame(in: .global) // 새로운 크기 업데이트
+                                            }
+                                    })
                             } else {
                                 VStack(alignment: .center) {
                                     Spacer()
