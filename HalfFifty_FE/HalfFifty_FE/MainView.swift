@@ -9,19 +9,14 @@ import SwiftUI
 import AVFoundation
 
 struct MainView: View {
-    // 메뉴 표시 여부 바인딩
-    @Binding var showMenuView : Bool
-    
-    // 나중에 Binding으로 변경
-    @State var onCamera : Bool = false // 카메라 켜져있는지 여부
-    @State var useCamera : Bool = false // 카메라 사용 권한 여부
-    @State var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
-    
-    @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
-    
-    @State var text : String = "" // 번역할 문장 입력
-    @State var useMicrophone : Bool = false // 음성 임력 사용 여부
-    
+    @Binding var showMenuView: Bool // 메뉴 표시 여부
+    @State private var useCamera: Bool = false // 카메라 권한 여부
+    @State private var onCamera: Bool = false // 카메라 활성화 여부
+    @State private var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
+    @State private var changeToSignLanguage: Bool = true // 번역 방향 여부
+    @State private var text: String = "" // 번역할 문장
+    @State var useMicrophone: Bool = false // 음성 입력 사용 여부
+
     var body: some View {
         GeometryReader { geometry in
             VStack {
@@ -76,7 +71,6 @@ struct MainView: View {
                 // body
                 VStack {
                     VStack {
-                        // 번역 선택
                         HStack(alignment: .center) {
                             if self.changeTosignLanguage {
                                 Text("수어")
