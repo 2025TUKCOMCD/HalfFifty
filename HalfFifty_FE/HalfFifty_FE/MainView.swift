@@ -205,7 +205,7 @@ struct MainView: View {
                                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                 .background(Color.black)
                                 .cornerRadius(8)
-                                .shadow(radius: 2) // 그림자 추가로 시각적 효과
+                                .shadow(radius: 2)
                             }
                             
                             // 카메라 전환 버튼
@@ -214,7 +214,7 @@ struct MainView: View {
                                     Spacer() // 나머지 공간을 차지하여 버튼을 하단에 배치
 
                                     Button(action: {
-                                        self.isFrontCamera.toggle() // 상태 변경
+                                        self.isFrontCamera.toggle()
                                     }) {
                                         ZStack {
                                             Circle()
