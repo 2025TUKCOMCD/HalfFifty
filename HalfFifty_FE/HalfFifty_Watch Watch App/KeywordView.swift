@@ -7,33 +7,81 @@
 
 import SwiftUI
 
-struct KeywordView: View {
-    @State private var keywords = ["김민지", "김먼지", "김망디", "김망디렁이"]
+struct Keyword: Identifiable, Codable {
+    let keywordId: UUID
+    let keyword: String
+    
+    var id: UUID { keywordId }
+}
 
+struct KeywordResponse: Codable {
+    let success: Bool
+    let message: String
+    let keywordList: [Keyword]
+}
+
+struct KeywordView: View {
+    @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
+    @State private var keywords: [Keyword] = []
+    @State private var isLoading = false
     var body: some View {
         VStack {
-            List {
-                ForEach(keywords, id: \.self) { keyword in
-                    Text(keyword)
-                        .font(.title3)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                deleteKeyword(keyword: keyword)
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+            if isLoading {
+                ProgressView("Loading...")
+            } else {
+                List {
+                    ForEach(keywords) { keyword in
+                        Text(keyword.keyword)
+                            .font(.title3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    deleteKeyword(keywordId: keyword.keywordId)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .tint(.red)
                             }
-                            .tint(.red)
+                    }
+                    
                         }
+                    }
                 }
+                .listStyle(PlainListStyle())
             }
-            .listStyle(PlainListStyle())
         }
         .navigationTitle("키워드 관리")
     }
-
-    private func deleteKeyword(keyword: String) {
-        keywords.removeAll { $0 == keyword }
+    
+    private func fetchKeywords() {
+        guard let url = URL(string: "http://54.180.92.32/keyword/user/\(userId)") else { return }
+        
+        isLoading = true
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    print("Error fetching keywords: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.keywords = decodedResponse.keywordList
+                    } else {
+                        print("Failed to fetch keywords: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+    
     }
 }
 
