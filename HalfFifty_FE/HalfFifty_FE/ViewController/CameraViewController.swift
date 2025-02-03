@@ -54,13 +54,18 @@ class CameraViewController: UIViewController {
         view.addSubview(overlayView)
     }
      
-     private func setupVideoOutput() {
-         videoOutput = AVCaptureVideoDataOutput()
-         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-         if captureSession.canAddOutput(videoOutput) {
-             captureSession.addOutput(videoOutput)
-         }
-     }
+    private func setupVideoOutput() {
+        videoOutput = AVCaptureVideoDataOutput()
+        
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+
+        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        }
+    }
     
     func switchCamera() {
         isFrontCamera.toggle()
