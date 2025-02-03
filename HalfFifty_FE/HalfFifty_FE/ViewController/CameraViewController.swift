@@ -10,13 +10,16 @@ import AVFoundation
 import MediaPipeTasksVision
 
 class CameraViewController: UIViewController {
-    // Properties
-    var captureSession: AVCaptureSession? // 카메라 세션 관리
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer? // 카메라 미리보기 레이어
-    var currentDevice: AVCaptureDevice? // 현재 사용 중인 카메라 디바이스
-    var handLandmarker: HandLandmarker? // Mediapipe HandLandmarker 객체
-    var isFrontCamera: Bool = true // 전면/후면 카메라 상태
-    var cameraFrame: CGRect = .zero // MainView에서 전달받은 카메라 크기
+    var isFrontCamera: Bool = false
+    var cameraFrame: CGRect = .zero
+    private var captureSession: AVCaptureSession!
+    private var videoPreviewLayer: AVCaptureVideoPreviewLayer!
+    private var currentDevice: AVCaptureDevice!
+    private var handLandmarker: HandLandmarker!
+    private var videoInput: AVCaptureDeviceInput!
+    private var videoOutput: AVCaptureVideoDataOutput!
+    private var initialBackCameraZoomFactor: CGFloat = 1.0 // 초기 후면 카메라 배율 저장
+    private var handProcessor: HandLandmarkerResultProcessor!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,96 +28,101 @@ class CameraViewController: UIViewController {
     }
 
     // 카메라 초기화
-    func setupCamera() {
+    private func setupCamera() {
         captureSession = AVCaptureSession()
-        guard let captureSession = captureSession else { return }
+        captureSession?.sessionPreset = .high
 
-        if isFrontCamera {
-            // 전면 카메라 설정
-            currentDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
-        } else {
-            // 후면 카메라에서 기본 카메라(광각 카메라가 아닌 일반 1배율 카메라) 선택
-            let deviceTypes: [AVCaptureDevice.DeviceType] = [
-                .builtInTripleCamera,  // iPhone 11 Pro 이상
-                .builtInDualCamera,    // iPhone X, XS, 11, 12, 13 기본 카메라
-                .builtInWideAngleCamera // iPhone SE, iPhone 7, 8 기본 카메라
-            ]
-            
-            let discoverySession = AVCaptureDevice.DiscoverySession(
-                deviceTypes: deviceTypes,
-                mediaType: .video,
-                position: .back
-            )
+        switchCamera(toFront: isFrontCamera)
 
-            currentDevice = discoverySession.devices.first  // 가장 먼저 감지된 기본 카메라 선택
-            
-            if let backCamera = currentDevice {
-                do {
-                    try backCamera.lockForConfiguration()
-                    backCamera.videoZoomFactor = 1.0  // 1배율로 강제 설정
-                    backCamera.unlockForConfiguration()
-                } catch {
-                    print("후면 카메라 1배율 설정 실패: \(error.localizedDescription)")
-                }
-            }
-        }
+        videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        videoPreviewLayer.videoGravity = .resizeAspectFill
+        videoPreviewLayer.frame = view.layer.bounds
+        view.layer.addSublayer(videoPreviewLayer)
 
-        guard let videoCaptureDevice = currentDevice else {
-            print("카메라를 찾을 수 없습니다.")
-            return
-        }
+        setupVideoOutput()
 
-        do {
-            // 기존 입력 제거 (카메라 전환 시 필요)
-            if let currentInput = captureSession.inputs.first {
-                captureSession.removeInput(currentInput)
-            }
-
-            let videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
-            if captureSession.canAddInput(videoInput) {
-                captureSession.addInput(videoInput)
-            } else {
-                print("비디오 입력을 추가할 수 없습니다.")
-                return
-            }
-
-            // 기존 출력 제거 후 다시 추가 (카메라 전환 시 필요)
-            if let currentOutput = captureSession.outputs.first {
-                captureSession.removeOutput(currentOutput)
-            }
-
-            let videoOutput = AVCaptureVideoDataOutput()
-            videoOutput.videoSettings = [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-            ]
-            videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
-            if captureSession.canAddOutput(videoOutput) {
-                captureSession.addOutput(videoOutput)
-            } else {
-                print("비디오 출력을 추가할 수 없습니다.")
-                return
-            }
-
-            // 미리보기 레이어 설정
-            videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-            videoPreviewLayer?.videoGravity = .resizeAspectFill
-            videoPreviewLayer?.frame = view.layer.bounds
-            if let videoPreviewLayer = videoPreviewLayer {
-                view.layer.addSublayer(videoPreviewLayer)
-            }
-
-            // 세션 시작
-            DispatchQueue.global(qos: .userInitiated).async {
-                captureSession.startRunning()
-            }
-        } catch {
-            print("카메라 초기화 중 에러 발생: \(error.localizedDescription)")
+        // 백그라운드 스레드에서 실행
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.captureSession.startRunning()
         }
     }
+     
+     private func setupVideoOutput() {
+         videoOutput = AVCaptureVideoDataOutput()
+         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoQueue"))
+         if captureSession.canAddOutput(videoOutput) {
+             captureSession.addOutput(videoOutput)
+         }
+     }
     
     func switchCamera() {
-        self.isFrontCamera.toggle()
-        setupCamera()
+        isFrontCamera.toggle()
+        switchCamera(toFront: isFrontCamera)
+    }
+    
+    private func switchCamera(toFront: Bool) {
+        captureSession.beginConfiguration()
+        
+        if let currentInput = captureSession.inputs.first {
+            captureSession.removeInput(currentInput)
+        }
+        
+        let position: AVCaptureDevice.Position = toFront ? .front : .back
+        if let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position) {
+            do {
+                let newInput = try AVCaptureDeviceInput(device: newDevice)
+                if captureSession.canAddInput(newInput) {
+                    captureSession.addInput(newInput)
+                    currentDevice = newDevice
+                    videoInput = newInput
+                    
+                    if position == .back {
+                        if initialBackCameraZoomFactor == 1.0 {
+                            initialBackCameraZoomFactor = currentDevice.videoZoomFactor
+                        } else {
+                            try? currentDevice.lockForConfiguration()
+                            currentDevice.videoZoomFactor = initialBackCameraZoomFactor
+                            currentDevice.unlockForConfiguration()
+                        }
+                    }
+                }
+            } catch {
+                print("카메라 전환 오류: \(error)")
+            }
+        }
+        
+        captureSession.commitConfiguration()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        videoPreviewLayer.frame = view.bounds
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        captureSession.stopRunning()
+    }
+    
+    // HandLandmarker의 실시간 감지 결과를 처리할 클래스
+    class HandLandmarkerResultProcessor: NSObject, HandLandmarkerLiveStreamDelegate {
+        weak var parent: CameraViewController?
+
+        init(parent: CameraViewController) {
+            self.parent = parent
+        }
+
+        func handLandmarker(
+            _ handLandmarker: HandLandmarker,
+            didFinishDetection result: HandLandmarkerResult?,
+            timestampInMilliseconds: Int,
+            error: Error?
+        ) {
+            guard let result = result else { return }
+            DispatchQueue.main.async {
+                self.parent?.drawLandmarks(result.landmarks)
+            }
+        }
     }
 
     // Mediapipe HandLandmarker 초기화
@@ -123,12 +131,19 @@ class CameraViewController: UIViewController {
             print("hand_landmarker.task 모델을 찾을 수 없습니다.")
             return
         }
-        
+
         do {
             let options = HandLandmarkerOptions()
             options.baseOptions.modelAssetPath = modelPath
+            options.runningMode = .liveStream  // 실시간 스트리밍 모드 설정
             options.numHands = 2 // 감지할 손의 최대 개수
-            
+            options.minHandDetectionConfidence = 0.5
+            options.minHandPresenceConfidence = 0.5
+            options.minTrackingConfidence = 0.5
+
+            handProcessor = HandLandmarkerResultProcessor(parent: self)
+            options.handLandmarkerLiveStreamDelegate = handProcessor
+
             handLandmarker = try HandLandmarker(options: options)
         } catch {
             print("HandLandmarker 초기화 중 에러 발생: \(error.localizedDescription)")
@@ -136,24 +151,21 @@ class CameraViewController: UIViewController {
     }
 
     // 프레임 데이터 처리
-    func processFrame(_ pixelBuffer: CVPixelBuffer) {
+    func processFrame(_ pixelBuffer: CVPixelBuffer, timestamp: Int) {
         guard let handLandmarker = handLandmarker else { return }
-        
+
         // 픽셀 버퍼를 정사각형으로 변환
         guard let resizedPixelBuffer = resizePixelBufferToSquare(pixelBuffer) else {
             print("정사각형으로 변환 중 에러 발생")
             return
         }
-        
+
         do {
             // Mediapipe 이미지 생성
             let mpImage = try MPImage(pixelBuffer: resizedPixelBuffer)
-            
-            // 손 랜드마크 감지
-            let result = try handLandmarker.detect(image: mpImage)
-            
-            // 감지 결과 표시
-            drawLandmarks(result.landmarks)
+
+            // Live Stream 모드에서는 detectAsync 사용
+            try handLandmarker.detectAsync(image: mpImage, timestampInMilliseconds: timestamp)
         } catch {
             print("프레임 처리 중 에러 발생: \(error.localizedDescription)")
         }
@@ -279,6 +291,11 @@ extension HandLandmarker {
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        processFrame(pixelBuffer)
+
+        // 타임스탬프 추출 (밀리초 단위)
+        let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds * 1000
+
+        // detectAsync 호출
+        processFrame(pixelBuffer, timestamp: Int(timestamp))
     }
 }
