@@ -33,7 +33,7 @@ class CameraViewController: UIViewController {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .high
         switchCamera(toFront: isFrontCamera)
-
+        
         videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         videoPreviewLayer.videoGravity = .resizeAspectFill
         videoPreviewLayer.frame = view.layer.bounds
@@ -41,7 +41,6 @@ class CameraViewController: UIViewController {
 
         setupVideoOutput()
 
-        // 백그라운드 스레드에서 실행
         DispatchQueue.global(qos: .userInitiated).async {
             self.captureSession.startRunning()
         }
@@ -86,16 +85,6 @@ class CameraViewController: UIViewController {
                     captureSession.addInput(newInput)
                     currentDevice = newDevice
                     videoInput = newInput
-                    
-                    if position == .back {
-                        if initialBackCameraZoomFactor == 1.0 {
-                            initialBackCameraZoomFactor = currentDevice.videoZoomFactor
-                        } else {
-                            try? currentDevice.lockForConfiguration()
-                            currentDevice.videoZoomFactor = initialBackCameraZoomFactor
-                            currentDevice.unlockForConfiguration()
-                        }
-                    }
                 }
             } catch {
                 print("카메라 전환 오류: \(error)")
@@ -115,30 +104,9 @@ class CameraViewController: UIViewController {
         super.viewWillDisappear(animated)
         captureSession.stopRunning()
     }
-    
-    // HandLandmarker의 실시간 감지 결과를 처리할 클래스
-    class HandLandmarkerResultProcessor: NSObject, HandLandmarkerLiveStreamDelegate {
-        weak var parent: CameraViewController?
-
-        init(parent: CameraViewController) {
-            self.parent = parent
-        }
-
-        func handLandmarker(
-            _ handLandmarker: HandLandmarker,
-            didFinishDetection result: HandLandmarkerResult?,
-            timestampInMilliseconds: Int,
-            error: Error?
-        ) {
-            guard let result = result else { return }
-            DispatchQueue.main.async {
-                self.parent?.drawLandmarks(result.landmarks)
-            }
-        }
-    }
 
     // Mediapipe HandLandmarker 초기화
-    func setupHandLandmarker() {
+    private func setupHandLandmarker() {
         guard let modelPath = Bundle.main.path(forResource: "hand_landmarker", ofType: "task") else {
             print("hand_landmarker.task 모델을 찾을 수 없습니다.")
             return
@@ -147,14 +115,12 @@ class CameraViewController: UIViewController {
         do {
             let options = HandLandmarkerOptions()
             options.baseOptions.modelAssetPath = modelPath
-            options.runningMode = .liveStream  // 실시간 스트리밍 모드 설정
-            options.numHands = 2 // 감지할 손의 최대 개수
+            options.runningMode = .liveStream
+            options.numHands = 2
             options.minHandDetectionConfidence = 0.5
             options.minHandPresenceConfidence = 0.5
             options.minTrackingConfidence = 0.5
-
-            handProcessor = HandLandmarkerResultProcessor(parent: self)
-            options.handLandmarkerLiveStreamDelegate = handProcessor
+            options.handLandmarkerLiveStreamDelegate = self
 
             handLandmarker = try HandLandmarker(options: options)
         } catch {
@@ -163,128 +129,128 @@ class CameraViewController: UIViewController {
     }
 
     // 프레임 데이터 처리
-    func processFrame(_ pixelBuffer: CVPixelBuffer, timestamp: Int) {
-        guard let handLandmarker = handLandmarker else { return }
+    private func processFrame(_ pixelBuffer: CVPixelBuffer, timestamp: Int) {
+        guard handLandmarker != nil else { return }
 
-        // 픽셀 버퍼를 정사각형으로 변환
-        guard let resizedPixelBuffer = resizePixelBufferToSquare(pixelBuffer) else {
-            print("정사각형으로 변환 중 에러 발생")
+        let format = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        if format != kCVPixelFormatType_32BGRA {
+            print("Unsupported pixel format detected: \(format). Converting to kCVPixelFormatType_32BGRA.")
+            guard let convertedBuffer = convertPixelBufferToBGRA(pixelBuffer) else {
+                print("픽셀 버퍼 변환 실패")
+                return
+            }
+            processValidFrame(convertedBuffer, timestamp: timestamp)
             return
         }
 
-        do {
-            // Mediapipe 이미지 생성
-            let mpImage = try MPImage(pixelBuffer: resizedPixelBuffer)
+        processValidFrame(pixelBuffer, timestamp: timestamp)
+    }
 
-            // Live Stream 모드에서는 detectAsync 사용
+    // `kCVPixelFormatType_32BGRA`로 변환하는 함수 추가
+    private func convertPixelBufferToBGRA(_ pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        
+        var bgraBuffer: CVPixelBuffer?
+        let attributes: [String: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault, width, height,
+            kCVPixelFormatType_32BGRA,
+            attributes as CFDictionary,
+            &bgraBuffer
+        )
+
+        guard status == kCVReturnSuccess, let outputBuffer = bgraBuffer else {
+            return nil
+        }
+
+        // 변환된 픽셀 버퍼에 원본 데이터 복사
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        CVPixelBufferLockBaseAddress(outputBuffer, [])
+        
+        if let src = CVPixelBufferGetBaseAddress(pixelBuffer),
+           let dst = CVPixelBufferGetBaseAddress(outputBuffer) {
+            memcpy(dst, src, CVPixelBufferGetDataSize(pixelBuffer))
+        }
+
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
+        CVPixelBufferUnlockBaseAddress(outputBuffer, [])
+
+        return outputBuffer
+    }
+
+    // 변환된 프레임을 처리하는 함수
+    private func processValidFrame(_ pixelBuffer: CVPixelBuffer, timestamp: Int) {
+        do {
+            let mpImage = try MPImage(pixelBuffer: pixelBuffer)
             try handLandmarker.detectAsync(image: mpImage, timestampInMilliseconds: timestamp)
         } catch {
             print("프레임 처리 중 에러 발생: \(error.localizedDescription)")
         }
     }
 
-    func resizePixelBufferToSquare(_ pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
-        let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-        let squareSize = min(width, height) // 정사각형 기준 크기
-        
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        let context = CIContext()
-        
-        // 정사각형 크기로 크롭
-        let croppedImage = ciImage.cropped(to: CGRect(x: 0, y: 0, width: CGFloat(squareSize), height: CGFloat(squareSize)))
-        
-        // 새로운 PixelBuffer 생성
-        var newPixelBuffer: CVPixelBuffer?
-        let pixelBufferAttributes: [String: Any] = [
-            kCVPixelBufferCGImageCompatibilityKey as String: true,
-            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
-        ]
-        
-        let status = CVPixelBufferCreate(
-            kCFAllocatorDefault,
-            Int(squareSize),
-            Int(squareSize),
-            kCVPixelFormatType_32BGRA,
-            pixelBufferAttributes as CFDictionary,
-            &newPixelBuffer
-        )
-        
-        guard status == kCVReturnSuccess, let outputPixelBuffer = newPixelBuffer else {
-            return nil
-        }
-        
-        // 변환된 이미지를 새로운 PixelBuffer에 렌더링
-        context.render(croppedImage, to: outputPixelBuffer)
-        return outputPixelBuffer
-    }
-
     // 랜드마크 및 연결선 그리기
-    func drawLandmarks(_ landmarks: [[NormalizedLandmark]]) {
-        DispatchQueue.main.async {
-            // 기존 랜드마크 제거
-            self.view.layer.sublayers?.removeAll(where: { $0.name == "landmark" || $0.name == "connection" })
+    private func drawHandLandmarks(_ result: HandLandmarkerResult) {
+        let imageSize = overlayView.bounds.size
+        
+        if imageSize.width == 0 || imageSize.height == 0 {
+            print("이미지 크기 오류: \(imageSize), 기본 크기로 설정")
+            return
+        }
 
-            let viewWidth = self.cameraFrame.width
-            let viewHeight = self.cameraFrame.height
-            let yOffsetCorrection: CGFloat = self.isFrontCamera ? viewHeight * 0.05 : 0  // 전면 카메라 Y 보정값 추가
+        UIGraphicsBeginImageContext(imageSize)
+        guard let context = UIGraphicsGetCurrentContext() else { return }
 
-            for hand in landmarks {
-                var adjustedLandmarks: [CGPoint] = []
+        context.clear(CGRect(origin: .zero, size: imageSize))
+        context.setStrokeColor(UIColor.green.cgColor)
+        context.setLineWidth(2.0)
 
-                for landmark in hand {
-                    var x = CGFloat(landmark.x) * viewWidth
-                    var y = (1.0 - CGFloat(landmark.y)) * viewHeight
-
-                    if self.isFrontCamera {
-                        // 전면 카메라: 180도 회전 및 좌우 반전 해제
-                        x = viewWidth - x
-                        y = viewHeight - y - yOffsetCorrection  // Y 보정값 적용
-                    } else {
-                        // 후면 카메라: 좌우 반전 해제
-                        x = viewWidth - x
-                    }
-
-                    // 90도 회전 문제 해결 (x와 y를 서로 변환)
+        for hand in result.landmarks {
+            var points: [CGPoint] = []
+            
+            for landmark in hand {
+                var x = CGFloat(landmark.x) * imageSize.width
+                var y = (1 - CGFloat(landmark.y)) * imageSize.height
+                
+                if isFrontCamera {
+                    // 전면 카메라: 90도 오른쪽 회전
+                    let tempX = x
+                    x = imageSize.width - y
+                    y = tempX
+                } else {
+                    // 후면 카메라: 90도 왼쪽 회전 + y축 반전
                     let tempX = x
                     x = y
-                    y = viewHeight - tempX
-
-                    adjustedLandmarks.append(CGPoint(x: x, y: y))
-
-                    // 랜드마크 점
-                    let pointLayer = CALayer()
-                    pointLayer.name = "landmark"
-                    pointLayer.frame = CGRect(x: x - 2.5, y: y - 2.5, width: 5, height: 5)
-                    pointLayer.cornerRadius = 2.5
-                    pointLayer.backgroundColor = UIColor.red.cgColor
-                    self.view.layer.addSublayer(pointLayer)
+                    y = imageSize.height - tempX
+                    y = imageSize.height - y
                 }
+                
+                points.append(CGPoint(x: x, y: y))
 
-                // 연결선에도 동일한 Y 보정 적용
-                let connections = HandLandmarker.handConnections
-                for connection in connections {
-                    var startLandmark = adjustedLandmarks[connection.0]
-                    var endLandmark = adjustedLandmarks[connection.1]
+                let circleRect = CGRect(x: x - 3, y: y - 3, width: 6, height: 6)
+                context.setFillColor(UIColor.red.cgColor)
+                context.fillEllipse(in: circleRect)
+            }
+            
+            for (startIndex, endIndex) in HandLandmarker.handConnections {
+                if startIndex < points.count, endIndex < points.count {
+                    let start = points[startIndex]
+                    let end = points[endIndex]
 
-                    // Y 보정값 적용
-                    if self.isFrontCamera {
-                        startLandmark.y -= yOffsetCorrection
-                        endLandmark.y -= yOffsetCorrection
-                    }
-
-                    let lineLayer = CAShapeLayer()
-                    lineLayer.name = "connection"
-                    let path = UIBezierPath()
-                    path.move(to: startLandmark)
-                    path.addLine(to: endLandmark)
-                    lineLayer.path = path.cgPath
-                    lineLayer.strokeColor = UIColor.green.cgColor
-                    lineLayer.lineWidth = 2.0
-                    self.view.layer.addSublayer(lineLayer)
+                    context.move(to: start)
+                    context.addLine(to: end)
+                    context.strokePath()
                 }
             }
         }
+
+        overlayView.image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
     }
 }
 
@@ -300,15 +266,27 @@ extension HandLandmarker {
     ]
 }
 
+// HandLandmarkerLiveStreamDelegate 구현
+extension CameraViewController: HandLandmarkerLiveStreamDelegate {
+    func handLandmarker(
+        _ handLandmarker: HandLandmarker,
+        didFinishDetection result: HandLandmarkerResult?,
+        timestampInMilliseconds: Int,
+        error: Error?) {
+        
+        guard let result = result else { return }
+        
+        DispatchQueue.main.async {
+            self.drawHandLandmarks(result)
+        }
+    }
+}
+
 // AVCaptureVideoDataOutputSampleBufferDelegate 구현
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-
-        // 타임스탬프 추출 (밀리초 단위)
-        let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds * 1000
-
-        // detectAsync 호출
-        processFrame(pixelBuffer, timestamp: Int(timestamp))
+        let timestamp = Int(CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds * 1000)
+        processFrame(pixelBuffer, timestamp: timestamp)
     }
 }
