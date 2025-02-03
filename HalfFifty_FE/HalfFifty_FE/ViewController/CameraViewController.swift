@@ -31,8 +31,7 @@ class CameraViewController: UIViewController {
     // 카메라 초기화
     private func setupCamera() {
         captureSession = AVCaptureSession()
-        captureSession?.sessionPreset = .high
-
+        captureSession.sessionPreset = .high
         switchCamera(toFront: isFrontCamera)
 
         videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
@@ -109,6 +108,7 @@ class CameraViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         videoPreviewLayer.frame = view.bounds
+        overlayView.frame = view.bounds
     }
     
     override func viewWillDisappear(_ animated: Bool) {
