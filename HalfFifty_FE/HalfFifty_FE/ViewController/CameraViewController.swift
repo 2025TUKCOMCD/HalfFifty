@@ -18,13 +18,14 @@ class CameraViewController: UIViewController {
     private var handLandmarker: HandLandmarker!
     private var videoInput: AVCaptureDeviceInput!
     private var videoOutput: AVCaptureVideoDataOutput!
-    private var initialBackCameraZoomFactor: CGFloat = 1.0 // 초기 후면 카메라 배율 저장
-    private var handProcessor: HandLandmarkerResultProcessor!
+    
+    private let overlayView = UIImageView() // 랜드마크 및 연결선 표시용 레이어
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCamera() // 카메라 설정
         setupHandLandmarker() // Mediapipe HandLandmarker 설정
+        setupOverlayView()
     }
 
     // 카메라 초기화
@@ -45,6 +46,12 @@ class CameraViewController: UIViewController {
         DispatchQueue.global(qos: .userInitiated).async {
             self.captureSession.startRunning()
         }
+    }
+    
+    private func setupOverlayView() {
+        overlayView.frame = view.bounds
+        overlayView.contentMode = .scaleAspectFill
+        view.addSubview(overlayView)
     }
      
      private func setupVideoOutput() {
