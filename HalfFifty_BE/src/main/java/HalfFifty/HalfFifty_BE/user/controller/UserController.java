@@ -1,6 +1,7 @@
 package HalfFifty.HalfFifty_BE.user.controller;
 
 import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserSaveDTO;
+import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserUpdateDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.ResponseUserGetDTO;
 import HalfFifty.HalfFifty_BE.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,24 @@ public class UserController {
         requestMap.put("success", success);
         requestMap.put("message", success ? "유저 프로필 조회 성공" : "유저 프로필 조회 실패");
         requestMap.put("userInfo", responseUserGetDTO);
+
+        // status, body 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+    }
+
+    @PutMapping
+    public ResponseEntity<Map<String, Object>> updateUser(@RequestBody RequestUserUpdateDTO requestUserUpdateDTO) {
+        // 유저 닉네임 수정 service
+        UUID userId = userService.updateUser(requestUserUpdateDTO);
+
+        // 유저  닉네임 수정 여부
+        boolean success = userId != null;
+
+        // Map을 통해 메시지와 id 값 json 테이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "유저 닉네임 수정 성공" : "유저 닉네임 수정 실패");
+        requestMap.put("userId", userId);
 
         // status, body 설정해서 응답 리턴
         return ResponseEntity.status(HttpStatus.OK).body(requestMap);
