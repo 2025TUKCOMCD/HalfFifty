@@ -43,16 +43,6 @@
 		C9270D642D36472D00BDFD97 /* HalfFifty_Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HalfFifty_Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A5D587152D4415C300828796 /* Exceptions for "HalfFifty_Watch Watch App" folder in "HalfFifty_Watch Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"HalfFifty-Watch-Watch-App-Info.plist",
-			);
-			target = C9270D632D36472C00BDFD97 /* HalfFifty_Watch Watch App */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A5EAB7262D2B6D2900FE064E /* HalfFifty_FE */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -61,9 +51,6 @@
 		};
 		C9270D652D36472D00BDFD97 /* HalfFifty_Watch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				A5D587152D4415C300828796 /* Exceptions for "HalfFifty_Watch Watch App" folder in "HalfFifty_Watch Watch App" target */,
-			);
 			path = "HalfFifty_Watch Watch App";
 			sourceTree = "<group>";
 		};
@@ -477,6 +464,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -508,6 +496,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = HalfFifty_Watch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minji.HalfFifty-FE";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

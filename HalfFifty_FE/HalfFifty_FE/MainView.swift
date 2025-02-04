@@ -9,19 +9,15 @@ import SwiftUI
 import AVFoundation
 
 struct MainView: View {
-    // 메뉴 표시 여부 바인딩
-    @Binding var showMenuView : Bool
-    
-    // 나중에 Binding으로 변경
-    @State var onCamera : Bool = false // 카메라 켜져있는지 여부
-    @State var useCamera : Bool = false // 카메라 사용 권한 여부
-    @State var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
-    
-    @State var changeTosignLanguage : Bool = true // true: 수어를 번역, false: 수어로 번역
-    
-    @State var text : String = "" // 번역할 문장 입력
-    @State var useMicrophone : Bool = false // 음성 임력 사용 여부
-    
+    @Binding var showMenuView: Bool // 메뉴 표시 여부
+    @State private var useCamera: Bool = false // 카메라 권한 여부
+    @State private var onCamera: Bool = false // 카메라 활성화 여부
+    @State private var isFrontCamera: Bool = false // 현재 카메라가 전면인지 후면인지 여부, true: 전면, false: 후면
+    @State private var changeToSignLanguage: Bool = true // 번역 방향 여부
+    @State private var text: String = "" // 번역할 문장
+    @State var useMicrophone: Bool = false // 음성 입력 사용 여부
+    @State private var cameraFrame: CGRect = .zero // 카메라 크기 저장
+
     var body: some View {
         GeometryReader { geometry in
             VStack {
@@ -76,9 +72,8 @@ struct MainView: View {
                 // body
                 VStack {
                     VStack {
-                        // 번역 선택
                         HStack(alignment: .center) {
-                            if self.changeTosignLanguage {
+                            if self.changeToSignLanguage {
                                 Text("수어")
                                     .font(.system(size: 20))
                                     .frame(width: 75)
@@ -101,8 +96,7 @@ struct MainView: View {
                             
                             // 번역 전환 버튼
                             Button(action: {
-                                // 버튼 클릭 시
-                                self.changeTosignLanguage = !self.changeTosignLanguage
+                                self.changeToSignLanguage.toggle()
                             }) {
                                 // 버튼 스타일
                                 Image(systemName: "arrow.left.arrow.right")
@@ -116,7 +110,7 @@ struct MainView: View {
                             
                             Spacer()
                             
-                            if self.changeTosignLanguage {
+                            if self.changeToSignLanguage {
                                 // 번역어 선택
                                 Button(action: {
                                     // 버튼 클릭 시
@@ -145,13 +139,22 @@ struct MainView: View {
                     }
                     
                     // 카메라 영역
-                    if self.changeTosignLanguage {
+                    if self.changeToSignLanguage {
                         ZStack {
                             if self.useCamera && self.onCamera {
-                                CameraView(isFrontCamera: $isFrontCamera)
+                                CameraView(isFrontCamera: $isFrontCamera, cameraFrame: $cameraFrame)
                                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                     .cornerRadius(8)
                                     .shadow(radius: 2)
+                                    .background(GeometryReader { proxy in
+                                        Color.clear
+                                            .onAppear {
+                                                cameraFrame = proxy.frame(in: .global) // 초기 크기 저장
+                                            }
+                                            .onChange(of: proxy.size) { oldSize, newSize in
+                                                cameraFrame = proxy.frame(in: .global) // 새로운 크기 업데이트
+                                            }
+                                    })
                             } else {
                                 VStack(alignment: .center) {
                                     Spacer()
@@ -193,7 +196,7 @@ struct MainView: View {
                                         .foregroundColor(Color.blue)
                                         .cornerRadius(8)
                                         .padding(.bottom, 20)
-                                    } else if !onCamera {
+                                    } else if !self.onCamera {
                                         Button(action: {
                                             self.onCamera = true
                                         }) {
@@ -212,7 +215,7 @@ struct MainView: View {
                                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                 .background(Color.black)
                                 .cornerRadius(8)
-                                .shadow(radius: 2) // 그림자 추가로 시각적 효과
+                                .shadow(radius: 2)
                             }
                             
                             // 카메라 전환 버튼
@@ -221,7 +224,7 @@ struct MainView: View {
                                     Spacer() // 나머지 공간을 차지하여 버튼을 하단에 배치
 
                                     Button(action: {
-                                        self.isFrontCamera.toggle() // 상태 변경
+                                        self.isFrontCamera.toggle()
                                     }) {
                                         ZStack {
                                             Circle()
@@ -305,7 +308,9 @@ struct MainView: View {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         switch status {
         case .authorized:
-            self.useCamera = true
+            DispatchQueue.main.async {
+                self.useCamera = true
+            }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
@@ -313,9 +318,15 @@ struct MainView: View {
                 }
             }
         case .denied, .restricted:
-            self.useCamera = false
+            DispatchQueue.main.async {
+                self.useCamera = false
+                self.onCamera = false
+            }
         @unknown default:
-            self.useCamera = false
+            DispatchQueue.main.async {
+                self.useCamera = false
+                self.onCamera = false
+            }
         }
     }
 
