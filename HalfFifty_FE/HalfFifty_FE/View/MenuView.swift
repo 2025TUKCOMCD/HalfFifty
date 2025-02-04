@@ -36,7 +36,6 @@ struct MenuView: View {
                     }
                     .padding(.bottom, 72)
                     .padding(.top, 85)
-                    //                .frame(width: 229)
                     
                     // 메뉴 목록
                     VStack(alignment: .leading, spacing: 26) {
