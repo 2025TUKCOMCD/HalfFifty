@@ -60,7 +60,7 @@ struct MenuView: View {
                         MenuItem(icon: "tag", text: "키워드")
                     }
                     
-                    NavigationLink(destination: Text("setting")) {
+                    NavigationLink(destination: SettingView()) {
                         MenuItem(icon: "slider.horizontal.3", text: "설정")
                     }
                     
