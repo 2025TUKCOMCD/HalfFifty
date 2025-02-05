@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct MenuView: View {
+    @Binding var showMenuView: Bool
+    
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
@@ -39,8 +41,12 @@ struct MenuView: View {
                     
                     // 메뉴 목록
                     VStack(alignment: .leading, spacing: 26) {
-                        HStack(alignment: .center) {
-                            NavigationLink(destination: Text("home")) {
+                        Button(action: {
+                            withAnimation(.easeOut(duration: 0.4)) {
+                                self.showMenuView = false
+                            }
+                        }) {
+                            HStack(alignment: .center) {
                                 Image(systemName: "house")
                                     .imageScale(.small)
                                 Text("홈")
@@ -104,6 +110,21 @@ struct MenuView: View {
     }
 }
 
+struct MenuItem: View {
+    var icon: String
+    var text: String
+
+    var body: some View {
+        HStack(alignment: .center) {
+            Image(systemName: icon)
+                .imageScale(.small)
+            Text(text)
+                .font(.system(size: 18))
+        }
+        .foregroundColor(.black)
+    }
+}
+
 #Preview {
-    MenuView()
+    MenuView(showMenuView: .constant(false))
 }
