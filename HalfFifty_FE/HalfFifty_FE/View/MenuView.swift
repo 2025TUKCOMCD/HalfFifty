@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-class UserViewModel: ObservableObject {
-    @Published var nickname: String = "유고양이"
-}
-
 struct MenuView: View {
     @Binding var showMenuView: Bool
     @ObservedObject var userViewModel: UserViewModel // ViewModel로 상태 관리
