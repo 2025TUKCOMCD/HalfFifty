@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct UserView: View {
+    @State private var nickname: String = "유고양" // 임시
+    
     var body: some View {
         VStack {
             // 사용자 정보 리스트
@@ -19,12 +21,12 @@ struct UserView: View {
                 }
                 
                 Section {
-                    NavigationLink(destination: NicknameEditView()) {
+                    NavigationLink(destination: NicknameEditView(nickname: $nickname)) {
                         HStack {
                             Text("닉네임")
                                 .foregroundColor(.black)
                             Spacer()
-                            Text("유수현")
+                            Text(nickname)
                                 .foregroundColor(.gray)
                         }
                     }
