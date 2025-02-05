@@ -12,6 +12,7 @@ public class CreateUserDTOBean {
                 .userId(userDAO.getUserId())
                 .nickname(userDAO.getNickName())
                 .phoneNumber(userDAO.getPhoneNumber())
+                .username(userDAO.getUsername())
                 .createdAt(userDAO.getCreatedAt())
                 .build();
     }
