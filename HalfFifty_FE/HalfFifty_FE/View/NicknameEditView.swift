@@ -66,17 +66,6 @@ struct NicknameEditView: View {
     }
 }
 
-func koreaLangCheck(_ input: String) -> Bool {
-    let pattern = "^[가-힣a-zA-Z\\s]*$"
-    if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
-        let range = NSRange(location: 0, length: input.utf16.count)
-        if regex.firstMatch(in: input, options: [], range: range) != nil {
-            return true
-        }
-    }
-        return false
-}
-
 #Preview {
     NavigationStack {
         NicknameEditView(userViewModel: UserViewModel())
