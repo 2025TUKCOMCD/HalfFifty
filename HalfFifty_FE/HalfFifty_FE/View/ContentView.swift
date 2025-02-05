@@ -49,6 +49,7 @@ struct ContentView: View {
                                         self.showMainView = true
                                     }
                                 }
+                                userViewModel.fetchUser(userId: "9f373112-8e93-4444-a403-a986f8bea4a3")
                             }
                     }
                 }
