@@ -19,3 +19,9 @@ struct UserResponse: Codable {
     let message: String
     let userInfo: UserInfo?
 }
+
+struct NicknameUpdateResponse: Codable {
+    let success: Bool
+    let message: String
+    let userId: String
+}

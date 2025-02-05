@@ -51,7 +51,7 @@ struct NicknameEditView: View {
                 presentationMode.wrappedValue.dismiss()
             }) { },
             trailing: Button(action: {
-                saveNickname() // "저장" 버튼을 눌렀을 때만 값 업데이트
+                saveNickname()
             }) {
                 Text("저장")
                     .foregroundColor(isSaveButtonEnabled ? .blue : .gray) // 활성화 여부에 따라 색상 변경
@@ -61,7 +61,7 @@ struct NicknameEditView: View {
     }
 
     private func saveNickname() {
-        userViewModel.nickname = tempNickname
+        userViewModel.updateNickname(userId: userViewModel.userId, newNickname: tempNickname)
         presentationMode.wrappedValue.dismiss()
     }
 }
