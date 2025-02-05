@@ -12,5 +12,6 @@ public class ResponseUserGetDTO {
     UUID userId;
     String nickname;
     String phoneNumber;
+    String username;
     LocalDateTime createdAt;
 }
