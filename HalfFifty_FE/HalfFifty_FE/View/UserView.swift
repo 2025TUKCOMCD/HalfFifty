@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct UserView: View {
-    @State private var nickname: String = "유고양" // 임시
-    
+    @ObservedObject var userViewModel: UserViewModel // ViewModel 사용
+
     var body: some View {
         VStack {
-            // 사용자 정보 리스트
             List {
                 Section {
                     UserInfoRow(title: "이름", value: "유수현")
@@ -21,12 +20,12 @@ struct UserView: View {
                 }
                 
                 Section {
-                    NavigationLink(destination: NicknameEditView(nickname: $nickname)) {
+                    NavigationLink(destination: NicknameEditView(userViewModel: userViewModel)) { // 닉네임을 바인딩하여 전달
                         HStack {
                             Text("닉네임")
                                 .foregroundColor(.black)
                             Spacer()
-                            Text(nickname)
+                            Text(userViewModel.nickname) // 변경된 닉네임 반영
                                 .foregroundColor(.gray)
                         }
                     }
@@ -56,7 +55,7 @@ struct UserInfoRow: View {
 }
 
 #Preview {
-    NavigationView {
-        UserView()
+    NavigationStack {
+        UserView(userViewModel: UserViewModel())
     }
 }
