@@ -7,39 +7,78 @@
 
 import SwiftUI
 
-// 닉네임 수정 화면
 struct NicknameEditView: View {
-    @Environment(\.presentationMode) var presentationMode // 뒤로 가기 기능을 위한 환경 변수
-    @Binding var nickname: String // 기존 닉네임 값
+    @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var userViewModel: UserViewModel
+    @State private var tempNickname: String
 
-    var body: some View {
-        Form {
-            Section(header: Text("닉네임")) {
-                TextField(nickname, text: $nickname)
-            }
-        }
-        .navigationBarTitle("닉네임", displayMode: .inline) // 중앙 정렬된 제목
-        .navigationBarItems(
-            trailing: Button(action: {
-                saveNickname()
-            }) {
-                Text("저장")
-                    .foregroundColor(.blue)
-            }
-        )
-        .background(Color(UIColor.systemGray6)) // 배경 색상 맞추기
+    // "저장" 버튼 활성화 여부 (기존 닉네임과 입력값 비교)
+    private var isSaveButtonEnabled: Bool {
+        return !tempNickname.isEmpty && tempNickname != userViewModel.nickname
     }
 
-    // 닉네임 저장 함수 (API 연동)
+    init(userViewModel: UserViewModel) {
+        self.userViewModel = userViewModel
+        self._tempNickname = State(initialValue: userViewModel.nickname)
+    }
+
+    var body: some View {
+        VStack {
+            // 닉네임 입력 필드
+            VStack(alignment: .leading) {
+                Text("닉네임")
+                    .foregroundColor(.gray)
+                    .font(.system(size: 12))
+                    .padding(.leading)
+                TextField("닉네임을 입력하세요", text: $tempNickname) // placeholder 없이 빈 값
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
+                    .disableAutocorrection(true)  // 자동 수정 비활성화
+                    .textInputAutocapitalization(.never)  // 대문자 자동 변환 방지
+            }
+            .padding(.horizontal)
+            .padding(.top, 20)
+
+            Spacer()
+        }
+        .background(Color(UIColor.systemGray6))
+        .onAppear {
+            self.tempNickname = userViewModel.nickname // 키보드 세션이 사라지지 않도록 초기화
+        }
+        .navigationBarTitle("닉네임", displayMode: .inline) // 제목 중앙 정렬
+        .navigationBarItems(
+            leading: Button(action: {
+                presentationMode.wrappedValue.dismiss()
+            }) { },
+            trailing: Button(action: {
+                saveNickname() // "저장" 버튼을 눌렀을 때만 값 업데이트
+            }) {
+                Text("저장")
+                    .foregroundColor(isSaveButtonEnabled ? .blue : .gray) // 활성화 여부에 따라 색상 변경
+            }
+            .disabled(!isSaveButtonEnabled) // 기존 닉네임과 다를 때만 활성화
+        )
+    }
+
     private func saveNickname() {
-        print("닉네임 저장: \(nickname)")
-        presentationMode.wrappedValue.dismiss() // 저장 후 닫기
+        userViewModel.nickname = tempNickname
+        presentationMode.wrappedValue.dismiss()
     }
 }
 
+func koreaLangCheck(_ input: String) -> Bool {
+    let pattern = "^[가-힣a-zA-Z\\s]*$"
+    if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+        let range = NSRange(location: 0, length: input.utf16.count)
+        if regex.firstMatch(in: input, options: [], range: range) != nil {
+            return true
+        }
+    }
+        return false
+}
+
 #Preview {
-    // 테스트용 프리뷰
-    NavigationView {
-        NicknameEditView(nickname: .constant("유고양"))
+    NavigationStack {
+        NicknameEditView(userViewModel: UserViewModel())
     }
 }
