@@ -35,19 +35,7 @@ struct ContentView: View {
                             .disabled(self.showMenuView) // 메뉴 표시 상태면 메인 뷰 비활성화
                         
                         if self.showMenuView {
-                            // 반투명한 배경 추가 (MenuView 외부 터치 감지)
-                            Color.black.opacity(0.3)
-                                .ignoresSafeArea()
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.4)) {
-                                        self.showMenuView = false
-                                    }
-                                }
-                                .zIndex(1) // MenuView보다 뒤로 배치
-
-                            // MenuView 추가
-                            MenuView()
-                                .frame(width: geometry.size.width / 1.5)
+                            MenuView(showMenuView: $showMenuView)
                                 .transition(.move(edge: .leading).combined(with: .opacity))
                                 .zIndex(2) // 항상 최상위에 있도록 설정
                         }

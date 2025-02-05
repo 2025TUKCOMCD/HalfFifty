@@ -44,7 +44,7 @@ struct MainView: View {
                         Button(action: {
                             // 버튼 클릭 시
                             withAnimation {
-                                self.showMenuView = true
+                                self.showMenuView.toggle()
                             }
                         }) {
                             // 버튼 스타일
@@ -84,7 +84,7 @@ struct MainView: View {
                                 }) {
                                     // 버튼 스타일
                                     Text("한국어")
-                                        .foregroundColor(Color.white)
+                                        .foregroundColor(.white)
                                         .font(.system(size: 20))
                                     Image(systemName: "chevron.down")
                                         .imageScale(.small)
@@ -102,7 +102,6 @@ struct MainView: View {
                                 Image(systemName: "arrow.left.arrow.right")
                                     .padding(.horizontal, 19)
                                     .padding(.vertical, 6)
-                                    .cornerRadius(18)
                                     .background(Color.white)
                                     .foregroundColor(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
                                     .cornerRadius(18)
@@ -117,7 +116,7 @@ struct MainView: View {
                                 }) {
                                     // 버튼 스타일
                                     Text("한국어")
-                                        .foregroundColor(Color.white)
+                                        .foregroundColor(.white)
                                         .font(.system(size: 20))
                                     Image(systemName: "chevron.down")
                                         .imageScale(.small)
@@ -298,24 +297,20 @@ struct MainView: View {
                 .padding(10)
             }
         }
+        .navigationBarBackButtonHidden(true) // 기본 "< Back" 버튼 숨김
         .onAppear {
             checkCameraAuthorizationStatus()
         }
     }
     
-    // 카메라 권한 확인 및 요청
     func checkCameraAuthorizationStatus() {
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         switch status {
         case .authorized:
-            DispatchQueue.main.async {
-                self.useCamera = true
-            }
+            DispatchQueue.main.async { self.useCamera = true }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async {
-                    self.useCamera = granted
-                }
+                DispatchQueue.main.async { self.useCamera = granted }
             }
         case .denied, .restricted:
             DispatchQueue.main.async {
@@ -332,8 +327,9 @@ struct MainView: View {
 
     // 앱 설정 화면 열기
     func openAppSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        if let url = URL(string: UIApplication.openSettingsURLString),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
         }
     }
 }
