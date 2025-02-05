@@ -15,8 +15,8 @@ struct UserView: View {
             List {
                 Section {
                     UserInfoRow(title: "이름", value: "유수현")
-                    UserInfoRow(title: "전화번호", value: "010-4148-8137")
-                    UserInfoRow(title: "계정 생성일", value: "2024.01.07")
+                    UserInfoRow(title: "전화번호", value: userViewModel.phoneNumber)
+                    UserInfoRow(title: "계정 생성일", value: userViewModel.createdAt)
                 }
                 
                 Section {
