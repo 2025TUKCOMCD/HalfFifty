@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct HalfFifty_FEApp: App {
+    @StateObject private var fontSizeManager = FontSizeManager() // 앱 전역 폰트 설정
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                ContentView()
+            }
+                .environmentObject(fontSizeManager) // 모든 뷰에 적용
         }
     }
 }
