@@ -13,19 +13,21 @@ struct ContentView: View {
     
     // 메뉴 표시 여부
     @State var showMenuView: Bool = false
+
+    // UserViewModel 인스턴스 생성
+    @StateObject private var userViewModel = UserViewModel()
         
     var body: some View {
-        // 오른쪽에서 왼쪽으로 드래그하여 메뉴를 닫을 수 있음
         let drag = DragGesture()
             .onEnded {
                 if $0.translation.width < -100 {
-                    withAnimation(.easeOut(duration: 0.4)) { // 닫기 애니메이션 설정
+                    withAnimation(.easeOut(duration: 0.4)) {
                         self.showMenuView = false
                     }
                 }
             }
         
-        return NavigationView {
+        return NavigationStack {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     if self.showMainView {
@@ -35,7 +37,7 @@ struct ContentView: View {
                             .disabled(self.showMenuView) // 메뉴 표시 상태면 메인 뷰 비활성화
                         
                         if self.showMenuView {
-                            MenuView(showMenuView: $showMenuView)
+                            MenuView(showMenuView: $showMenuView, userViewModel: userViewModel) // ViewModel 전달
                                 .transition(.move(edge: .leading).combined(with: .opacity))
                                 .zIndex(2) // 항상 최상위에 있도록 설정
                         }
@@ -47,6 +49,7 @@ struct ContentView: View {
                                         self.showMainView = true
                                     }
                                 }
+                                userViewModel.fetchUser(userId: "9f373112-8e93-4444-a403-a986f8bea4a3")
                             }
                     }
                 }
