@@ -38,7 +38,7 @@ struct SettingView: View {
             }
             .padding(.vertical)
             
-            NavigationLink(destination: Text("FAQ")) {
+            NavigationLink(destination: FAQView()) {
                 HStack {
                     Text("FAQ")
                         .foregroundStyle(.black)
