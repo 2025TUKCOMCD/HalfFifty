@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct ContentView: View {
     @State private var inputText: String = ""
     @ObservedObject private var notificationManager = WatchNotificationManager.shared
-    private let recorder = AudioRecorderManager.shared  // 녹음 관리 객체 추가
+    private let recorder = AudioRecorderManager.shared
+    @State private var keywords: [Keyword] = []
 
     var body: some View {
         NavigationView {
@@ -33,10 +35,11 @@ struct ContentView: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
                 } onSubmit: { newText in
                     inputText = newText
+                    checkForMatchingKeywords(text: newText) // 키워드와 매칭 확인
                 }
                 .buttonStyle(PlainButtonStyle())
 
-                NavigationLink(destination: KeywordView()) {
+                NavigationLink(destination: KeywordView(keywords: $keywords)) {
                     HStack(spacing: 8) {
                         ZStack {
                             Circle()
@@ -63,8 +66,54 @@ struct ContentView: View {
             .padding()
             .navigationTitle("手다쟁이")
             .onAppear {
-                recorder.startRecordingLoop()  // 앱 실행 시 자동으로 녹음 시작
+                recorder.startRecordingLoop()
+                fetchKeywords()
             }
         }
+    }
+    
+    private func fetchKeywords() {
+        guard let url = URL(string: "http://54.180.92.32/keyword/user/9f373112-8e93-4444-a403-a986f8bea4a3") else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error fetching keywords: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.keywords = decodedResponse.keywordList
+                    } else {
+                        print("Failed to fetch keywords: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+    
+    private func checkForMatchingKeywords(text: String) {
+        for keyword in keywords {
+            if text.contains(keyword.keyword) {
+                sendAlert(for: keyword.keyword)
+                break
+            }
+        }
+    }
+
+    private func sendAlert(for keyword: String) {
+        let notificationContent = UNMutableNotificationContent()
+        notificationContent.title = "키워드 감지"
+        notificationContent.body = "감지된 키워드: \(keyword)"
+        notificationContent.sound = .default
+        
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: notificationContent, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
     }
 }

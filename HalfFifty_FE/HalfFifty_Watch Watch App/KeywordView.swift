@@ -33,7 +33,7 @@ struct AddKeywordResponse: Codable {
 
 struct KeywordView: View {
     @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
-    @State private var keywords: [Keyword] = []
+    @Binding var keywords: [Keyword]
     @State private var isLoading = false
     @State private var newKeyword = ""
     @State private var isAddingKeyword = false
@@ -118,6 +118,7 @@ struct KeywordView: View {
             }
         }.resume()
     }
+
     
     private func deleteKeyword(keywordId: UUID) {
         guard let url = URL(string: "http://54.180.92.32/keyword") else { return }
@@ -199,7 +200,7 @@ struct KeywordView: View {
 struct KeywordView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            KeywordView()
+            KeywordView(keywords: .constant([]))
         }
     }
 }
