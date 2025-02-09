@@ -48,7 +48,7 @@ struct SettingView: View {
             }
             .padding(.vertical)
             
-            NavigationLink(destination: Text("고객센터")) {
+            NavigationLink(destination: CustomerCenterView()) {
                 HStack {
                     Text("고객센터")
                         .foregroundStyle(.black)
