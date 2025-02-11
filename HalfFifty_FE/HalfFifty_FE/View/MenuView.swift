@@ -56,7 +56,7 @@ struct MenuView: View {
                         MenuItem(icon: "person", text: "사용자 정보")
                     }
                     
-                    NavigationLink(destination: Text("keyword")) {
+                    NavigationLink(destination: KeywordSettingsView()) {
                         MenuItem(icon: "tag", text: "키워드")
                     }
                     
