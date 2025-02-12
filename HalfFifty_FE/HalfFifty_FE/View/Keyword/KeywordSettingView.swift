@@ -7,16 +7,36 @@
 
 import SwiftUI
 
-struct KeywordSettingsView: View {
-    @State private var keywords = ["김민지", "김망디", "김망디렁이"]
-    @State private var searchText = ""
-    @State private var selectedKeyword: String?
+struct Keyword: Identifiable, Codable {
+    let keywordId: UUID
+    let keyword: String
+    
+    var id: UUID { keywordId }
+}
 
-    var filteredKeywords: [String] {
+struct KeywordResponse: Codable {
+    let success: Bool
+    let message: String
+    let keywordList: [Keyword]
+}
+
+struct DeleteKeywordResponse: Codable {
+    let success: Bool
+    let message: String
+}
+
+struct KeywordSettingsView: View {
+    @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
+    @State private var keywords: [Keyword] = []
+    @State private var searchText = ""
+    @State private var isLoading = false
+    @State private var isEditing = false
+
+    var filteredKeywords: [Keyword] {
         if searchText.isEmpty {
             return keywords
         } else {
-            return keywords.filter { $0.contains(searchText) }
+            return keywords.filter { $0.keyword.contains(searchText) }
         }
     }
 
@@ -25,29 +45,50 @@ struct KeywordSettingsView: View {
             VStack {
                 SearchBar(text: $searchText)
                     .padding(.top, 16)
-
-                List {
-                    ForEach(filteredKeywords, id: \.self) { keyword in
-                        HStack {
-                            Text(keyword)
+                if isLoading {
+                    ProgressView("Loading...")
+                } else {
+                    if keywords.isEmpty {
+                        VStack {
+                            Spacer()
+                            Text("키워드가 존재하지 않습니다.")
+                                .foregroundColor(.gray)
+                                .font(.caption)
                             Spacer()
                         }
-                        .swipeActions(edge: .trailing) {
-                            Button("삭제") {
-                                if let index = keywords.firstIndex(of: keyword) {
-                                    keywords.remove(at: index)
+                    } else {
+                        List {
+                            ForEach(filteredKeywords) { keyword in
+                                HStack {
+                                    Text(keyword.keyword)
+                                    Spacer()
+                                }
+                                .contextMenu {
+                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                        Label("편집", systemImage: "pencil")
+                                    }
+                                    Button(role: .destructive) {
+                                        deleteKeyword(keywordId: keyword.keywordId)
+                                    } label: {
+                                        Label("삭제", systemImage: "trash")
+                                    }
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button("삭제") {
+                                        deleteKeyword(keywordId: keyword.keywordId)
+                                    }
+                                    .tint(.red)
+                                    
+                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                        Text("편집")
+                                    }
+                                    .tint(.gray)
                                 }
                             }
-                            .tint(.red)
-
-                            NavigationLink(destination: KeywordAddView(keyword: keyword)) {
-                                Button("편집") {}
-                            }
-                            .tint(.gray)
                         }
+                        .listStyle(PlainListStyle())
                     }
                 }
-                .listStyle(PlainListStyle())
             }
             .background(Color.white)
             .navigationTitle("키워드 설정")
@@ -59,7 +100,79 @@ struct KeywordSettingsView: View {
                     }
                 }
             }
+            .onAppear {
+                fetchKeywords()
+            }
+            .onDisappear {
+                fetchKeywords()
+            }
         }
+    }
+
+    private func fetchKeywords() {
+        guard let url = URL(string: "http://54.180.92.32/keyword/user/\(userId)") else { return }
+        
+        isLoading = true
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    print("Error fetching keywords: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.keywords = decodedResponse.keywordList
+                    } else {
+                        print("Failed to fetch keywords: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+
+    private func deleteKeyword(keywordId: UUID) {
+        guard let url = URL(string: "http://54.180.92.32/keyword") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "keywordId": keywordId.uuidString,
+            "userId": userId
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error deleting keyword: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(DeleteKeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.keywords.removeAll { $0.keywordId == keywordId }
+                    } else {
+                        print("Failed to delete keyword: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
     }
 }
 
@@ -74,9 +187,11 @@ struct SearchBar: View {
                 .cornerRadius(8)
                 .overlay(
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                            .padding(.leading, 8)
+                        if text.isEmpty {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 8)
+                        }
                         Spacer()
                     }
                 )
