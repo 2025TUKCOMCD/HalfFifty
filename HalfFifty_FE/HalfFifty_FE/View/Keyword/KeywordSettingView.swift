@@ -168,9 +168,11 @@ struct SearchBar: View {
                 .cornerRadius(8)
                 .overlay(
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
-                            .padding(.leading, 8)
+                        if text.isEmpty {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+                                .padding(.leading, 8)
+                        }
                         Spacer()
                     }
                 )
