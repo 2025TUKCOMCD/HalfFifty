@@ -7,16 +7,30 @@
 
 import SwiftUI
 
-struct KeywordSettingsView: View {
-    @State private var keywords = ["김민지", "김망디", "김망디렁이"]
-    @State private var searchText = ""
-    @State private var selectedKeyword: String?
+struct Keyword: Identifiable, Codable {
+    let keywordId: UUID
+    let keyword: String
+    
+    var id: UUID { keywordId }
+}
 
-    var filteredKeywords: [String] {
+struct KeywordResponse: Codable {
+    let success: Bool
+    let message: String
+    let keywordList: [Keyword]
+}
+struct KeywordSettingsView: View {
+    @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
+    @State private var keywords: [Keyword] = []
+    @State private var searchText = ""
+    @State private var isLoading = false
+    @State private var isEditing = false
+
+    var filteredKeywords: [Keyword] {
         if searchText.isEmpty {
             return keywords
         } else {
-            return keywords.filter { $0.contains(searchText) }
+            return keywords.filter { $0.keyword.contains(searchText) }
         }
     }
 
@@ -26,28 +40,30 @@ struct KeywordSettingsView: View {
                 SearchBar(text: $searchText)
                     .padding(.top, 16)
 
-                List {
-                    ForEach(filteredKeywords, id: \.self) { keyword in
-                        HStack {
-                            Text(keyword)
-                            Spacer()
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button("삭제") {
-                                if let index = keywords.firstIndex(of: keyword) {
-                                    keywords.remove(at: index)
+                if isLoading {
+                    ProgressView("Loading...")
+                } else {
+                    List {
+                        ForEach(filteredKeywords) { keyword in
+                            HStack {
+                                Text(keyword.keyword)
+                                Spacer()
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button("삭제") {
+                                    deleteKeyword(keywordId: keyword.keywordId)
                                 }
-                            }
-                            .tint(.red)
+                                .tint(.red)
 
-                            NavigationLink(destination: KeywordAddView(keyword: keyword)) {
-                                Button("편집") {}
+                                NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                    Text("편집")
+                                }
+                                .tint(.gray)
                             }
-                            .tint(.gray)
                         }
                     }
+                    .listStyle(PlainListStyle())
                 }
-                .listStyle(PlainListStyle())
             }
             .background(Color.white)
             .navigationTitle("키워드 설정")
@@ -59,7 +75,42 @@ struct KeywordSettingsView: View {
                     }
                 }
             }
+            .onAppear {
+                fetchKeywords()
+            }
+            .onDisappear {
+                fetchKeywords()
+            }
         }
+    }
+
+    private func fetchKeywords() {
+        guard let url = URL(string: "http://54.180.92.32/keyword/user/\(userId)") else { return }
+        
+        isLoading = true
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    print("Error fetching keywords: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.keywords = decodedResponse.keywordList
+                    } else {
+                        print("Failed to fetch keywords: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
     }
 }
 
