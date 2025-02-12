@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+struct UpdateKeywordResponse: Codable {
+    let success: Bool
+    let message: String
+    let keywordId: UUID?
+}
+
 struct KeywordAddView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var tempKeyword: String
@@ -105,6 +111,48 @@ struct KeywordAddView: View {
         }.resume()
 
     }
+
+    private func updateKeyword(keywordId: UUID) {
+        guard let url = URL(string: "http://54.180.92.32/keyword"), !tempKeyword.isEmpty else { return }
+        
+        isLoading = true
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "keywordId": keywordId.uuidString,
+            "userId": userId,
+            "keyword": tempKeyword
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                
+                if let error = error {
+                    print("Error updating keyword: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(UpdateKeywordResponse.self, from: data)
+                    if decodedResponse.success {
+                        print("키워드 수정 성공: \(decodedResponse.keywordId?.uuidString ?? "")")
+                        dismiss()
+                    } else {
+                        print("키워드 수정 실패: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
     }
 }
 
