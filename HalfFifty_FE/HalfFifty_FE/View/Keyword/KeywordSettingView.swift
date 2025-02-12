@@ -55,6 +55,16 @@ struct KeywordSettingsView: View {
                                 Text(keyword.keyword)
                                 Spacer()
                             }
+                            .contextMenu {
+                                NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                    Label("편집", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    deleteKeyword(keywordId: keyword.keywordId)
+                                } label: {
+                                    Label("삭제", systemImage: "trash")
+                                }
+                            }
                             .swipeActions(edge: .trailing) {
                                 Button("삭제") {
                                     deleteKeyword(keywordId: keyword.keywordId)
