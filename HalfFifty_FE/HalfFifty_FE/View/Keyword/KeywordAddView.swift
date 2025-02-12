@@ -38,6 +38,13 @@ struct KeywordAddView: View {
                     .background(RoundedRectangle(cornerRadius: 8).fill(Color.white))
                     .disableAutocorrection(true)
                     .textInputAutocapitalization(.never)
+                
+                Text("특정 키워드가 주변에서 들리면 알림을 보냅니다.\n키워드를 입력해주세요.")
+                    .foregroundColor(.gray)
+                    .font(.footnote)
+                    .frame(alignment: .leading)
+                    .padding(.leading, 12)
+                    .padding(.top, 4)
             }
             .padding(.horizontal)
             .padding(.top, 20)
