@@ -46,16 +46,16 @@ public class FaqController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> saveFaq(@RequestBody RequestFaqSaveDTO requestFaqSaveDTO) {
         // Faq 저장 service
-        UUID FAQId = faqService.saveFaq(requestFaqSaveDTO);
+        UUID faqId = faqService.saveFaq(requestFaqSaveDTO);
 
         // Faq 저장 여부
-        boolean success = FAQId != null;
+        boolean success = faqId != null;
 
         // Map을 통해 메시지와 list 값 json 데이터로 변환
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("success", success);
         requestMap.put("message", success ? "FAQ 저장 성공" : "FAQ 저장 실패");
-        requestMap.put("FAQId", FAQId);
+        requestMap.put("FAQId", faqId);
 
         // status, body 설정해서 응답 리턴
         return ResponseEntity.status(HttpStatus.OK).body(requestMap);

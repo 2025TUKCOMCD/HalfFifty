@@ -30,6 +30,6 @@ public class FaqSaveBean {
         saveFaqDAOBean.exec(faqDAO);
 
         // 키값 반환
-        return faqDAO.getFAQId();
+        return faqDAO.getFaqId();
     }
 }

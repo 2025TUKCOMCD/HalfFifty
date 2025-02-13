@@ -18,7 +18,7 @@ import java.util.UUID;
 public class FaqDAO {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    UUID FAQId;
+    UUID faqId;
     String question;
     String answer;
     LocalDateTime createdAt;

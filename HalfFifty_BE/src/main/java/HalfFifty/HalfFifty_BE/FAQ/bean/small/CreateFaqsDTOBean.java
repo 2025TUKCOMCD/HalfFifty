@@ -18,7 +18,7 @@ public class CreateFaqsDTOBean {
         // 각 객체 DTO로 변환
         for(FaqDAO faqDAO : faqDAOS) {
             ResponseFaqGetDTO responseFaqGetDTO = ResponseFaqGetDTO.builder()
-                    .faqId(faqDAO.getFAQId())
+                    .faqId(faqDAO.getFaqId())
                     .question(faqDAO.getQuestion())
                     .answer(faqDAO.getAnswer())
                     .build();
