@@ -15,6 +15,7 @@ public class CreateAqUserDAOBean {
                 .userId(requestAqUserSaveDTO.getUserId())
                 .question(requestAqUserSaveDTO.getQuestion())
                 .questionCreatedAt(LocalDateTime.now())
+                .isAnswer(Boolean.FALSE)
                 .build();
     }
 }
