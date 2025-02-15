@@ -20,4 +20,9 @@ public class GetAqDAOBean {
     public AqDAO exec(UUID AqId) {
         return aqRepositoryJPA.findById(AqId).orElse(null);
     }
+
+    // AQ 아이디와 userId를 통해 원하는 객체 찾기
+    public AqDAO exec(UUID aqId, UUID userId) {
+        return aqRepositoryJPA.findByAqIdAndUserId(aqId, userId);
+    }
 }

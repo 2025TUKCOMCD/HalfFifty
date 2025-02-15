@@ -1,6 +1,7 @@
 package HalfFifty.HalfFifty_BE.FAQ.controller;
 
 import HalfFifty.HalfFifty_BE.FAQ.domain.DTO.RequestAqAdminUpdateDTO;
+import HalfFifty.HalfFifty_BE.FAQ.domain.DTO.RequestAqDeleteDTO;
 import HalfFifty.HalfFifty_BE.FAQ.domain.DTO.RequestAqUserSaveDTO;
 import HalfFifty.HalfFifty_BE.FAQ.domain.DTO.ResponseAqGetDTO;
 import HalfFifty.HalfFifty_BE.FAQ.service.AqService;
@@ -75,6 +76,20 @@ public class AqController {
         requestMap.put("success", success);
         requestMap.put("message", success ? "AQ 어드민 답장 성공" : "AQ 어드민 답장 실패");
         requestMap.put("AQId", AqId);
+
+        // status, body 값 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Map<String, Object>> deleteAq(@RequestBody RequestAqDeleteDTO requestAqDeleteDTO) {
+        // AQ 삭제 service 성공 여부
+        Boolean success = aqService.deleteAq(requestAqDeleteDTO);
+
+        // Map을 통해 메시지와 list 값 json 데이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "AQ 삭제 성공" : "AQ 삭제 실패");
 
         // status, body 값 설정해서 응답 리턴
         return ResponseEntity.status(HttpStatus.OK).body(requestMap);
