@@ -1,7 +1,7 @@
 package HalfFifty.HalfFifty_BE.FAQ.bean;
 
 import HalfFifty.HalfFifty_BE.FAQ.bean.small.CreateAqUserDAOBean;
-import HalfFifty.HalfFifty_BE.FAQ.bean.small.SaveAqUserDAOBean;
+import HalfFifty.HalfFifty_BE.FAQ.bean.small.SaveAqDAOBean;
 import HalfFifty.HalfFifty_BE.FAQ.domain.AqDAO;
 import HalfFifty.HalfFifty_BE.FAQ.domain.DTO.RequestAqUserSaveDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +12,12 @@ import java.util.UUID;
 @Component
 public class AqUserSaveBean {
     CreateAqUserDAOBean createAqUserDAOBean;
-    SaveAqUserDAOBean saveAqUserDAOBean;
+    SaveAqDAOBean saveAqDAOBean;
 
     @Autowired
-    public AqUserSaveBean(CreateAqUserDAOBean createAqUserDAOBean, SaveAqUserDAOBean saveAqUserDAOBean) {
+    public AqUserSaveBean(CreateAqUserDAOBean createAqUserDAOBean, SaveAqDAOBean saveAqDAOBean) {
         this.createAqUserDAOBean = createAqUserDAOBean;
-        this.saveAqUserDAOBean = saveAqUserDAOBean;
+        this.saveAqDAOBean = saveAqDAOBean;
     }
 
     // AQ 등록
@@ -27,7 +27,7 @@ public class AqUserSaveBean {
         if(aqDAO == null) return null;
 
         // 생성한 객체 저장
-        saveAqUserDAOBean.exec(aqDAO);
+        saveAqDAOBean.exec(aqDAO);
 
         // 키값 반환
         return  aqDAO.getAqId();

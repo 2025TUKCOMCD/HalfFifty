@@ -5,17 +5,19 @@ import HalfFifty.HalfFifty_BE.FAQ.repository.AqRepositoryJPA;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
-public class SaveAqUserDAOBean {
+public class GetAqDAOBean {
     AqRepositoryJPA aqRepositoryJPA;
 
     @Autowired
-    public SaveAqUserDAOBean(AqRepositoryJPA aqRepositoryJPA) {
+    public GetAqDAOBean(AqRepositoryJPA aqRepositoryJPA) {
         this.aqRepositoryJPA = aqRepositoryJPA;
     }
 
-    // AQ 객체 저장
-    public void exec(AqDAO aqDAO) {
-        aqRepositoryJPA.save(aqDAO);
+    // AQ 아이디를 통해 원하는 객체 찾기
+    public AqDAO exec(UUID AqId) {
+        return aqRepositoryJPA.findById(AqId).orElse(null);
     }
 }
