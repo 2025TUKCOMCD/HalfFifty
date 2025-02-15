@@ -12,4 +12,7 @@ public interface AqRepositoryJPA extends JpaRepository<AqDAO, UUID> {
 
     // user 아이디를 통해 원하는 객체 리스트 찾기
     List<AqDAO> findAllByUserId(UUID userId);
+
+    // AQ 아이디와 user 아이디를 통해 원하는 객체 찾기
+    AqDAO findByAqIdAndUserId(UUID aqId, UUID userId);
 }
