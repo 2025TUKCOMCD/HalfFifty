@@ -10,7 +10,8 @@ import SwiftUI
 struct TutorialView: View {
     private let images = ["tutorial-1", "tutorial-2", "tutorial-3"]
     @State private var currentIndex = 0
-    
+    @Binding var showTutorialView: Bool
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -53,10 +54,9 @@ struct TutorialView: View {
                         }
                     }
                 }
-                
+
                 HStack {
                     Spacer()
-                    
                     HStack(spacing: 8) {
                         ForEach(0..<images.count, id: \.self) { index in
                             Circle()
@@ -64,7 +64,6 @@ struct TutorialView: View {
                                 .frame(width: 8, height: 8)
                         }
                     }
-                    
                     Spacer()
                 }
                 .padding(.horizontal, 40)
@@ -72,6 +71,18 @@ struct TutorialView: View {
             }
             .navigationTitle("사용 방법")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if showTutorialView {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: {
+                            showTutorialView = false
+                        }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(.black)
+                        }
+                    }
+                }
+            }
             .toolbarBackground(Color.white, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
@@ -80,5 +91,5 @@ struct TutorialView: View {
 }
 
 #Preview {
-    TutorialView()
+    TutorialView(showTutorialView: .constant(true))
 }

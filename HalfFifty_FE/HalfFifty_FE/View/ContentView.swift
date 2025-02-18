@@ -35,7 +35,7 @@ struct ContentView: View {
                 ZStack(alignment: .leading) {
                     if self.showMainView {
                         if self.showTutorialView {
-                            TutorialView()
+                            TutorialView(showTutorialView: $showTutorialView) // 바인딩 전달
                         } else {
                             // 메뉴 표시 여부 바인딩
                             MainView(showMenuView: $showMenuView)

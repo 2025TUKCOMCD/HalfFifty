@@ -64,7 +64,7 @@ struct MenuView: View {
                         MenuItem(icon: "slider.horizontal.3", text: "설정")
                     }
                     
-                    NavigationLink(destination: TutorialView()) {
+                    NavigationLink(destination: TutorialView(showTutorialView: .constant(false))) {
                         MenuItem(icon: "lightbulb", text: "사용방법")
                     }
                 }
