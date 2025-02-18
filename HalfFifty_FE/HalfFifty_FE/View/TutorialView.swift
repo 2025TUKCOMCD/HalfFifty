@@ -32,7 +32,7 @@ struct TutorialView: View {
                             }) {
                                 Image(systemName: "chevron.left")
                                     .font(.largeTitle)
-                                    .foregroundColor(currentIndex > 0 ? .white : .black)
+                                    .foregroundColor(currentIndex > 0 ? .white : Color.white.opacity(0))
                                     .padding(.leading, 16)
                             }
                             .disabled(currentIndex == 0)
@@ -46,7 +46,7 @@ struct TutorialView: View {
                             }) {
                                 Image(systemName: "chevron.right")
                                     .font(.largeTitle)
-                                    .foregroundColor(currentIndex < images.count - 1 ? .white : .black)
+                                    .foregroundColor(currentIndex < images.count - 1 ? .white : Color.white.opacity(0))
                                     .padding(.trailing, 16)
                             }
                             .disabled(currentIndex == images.count - 1)
