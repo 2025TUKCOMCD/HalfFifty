@@ -37,6 +37,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'software.amazon.awssdk:lambda:2.20.26'  // AWS Lambda SDK
+
 }
 
 tasks.named('test') {
