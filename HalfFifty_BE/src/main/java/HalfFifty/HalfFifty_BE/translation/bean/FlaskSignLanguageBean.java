@@ -1,6 +1,8 @@
 package HalfFifty.HalfFifty_BE.translation.bean;
 
 import HalfFifty.HalfFifty_BE.translation.domain.DTO.RequestSignLanguageDTO;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -11,7 +13,9 @@ import java.util.Map;
 @Component
 public class FlaskSignLanguageBean {
     private final RestTemplate restTemplate;
-    private final String aiServerUrl = "http://3.39.24.155/predict";  // Flask 서버 URL
+
+    @Value("${ai.server.url}")
+    private String aiServerUrl;  // 환경변수로 관리
 
     public FlaskSignLanguageBean() {
         this.restTemplate = new RestTemplate();
@@ -28,7 +32,12 @@ public class FlaskSignLanguageBean {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(aiServerUrl, request, Map.class);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    aiServerUrl,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
