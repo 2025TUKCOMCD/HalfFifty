@@ -7,11 +7,6 @@ import java.util.UUID;
 
 @Data
 public class RequestSignLanguageDTO {
-    List<KeyPointPair> keyPointList;
-    UUID userId;
-    @Data
-    public static class KeyPointPair {
-        private int x;
-        private int y;
-    }
+    private List<List<Double>> keypoints;  // 10 x 55 형태의 키포인트 데이터
+    private UUID userId;  // 사용자 식별 ID
 }

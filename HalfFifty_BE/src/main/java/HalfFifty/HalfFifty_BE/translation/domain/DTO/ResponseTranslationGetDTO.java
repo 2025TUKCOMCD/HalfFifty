@@ -12,5 +12,6 @@ public class ResponseTranslationGetDTO {
     UUID translationId;
     UUID userId;
     String translationWord;
+    Double probability;
     LocalDateTime createdAt;
 }
