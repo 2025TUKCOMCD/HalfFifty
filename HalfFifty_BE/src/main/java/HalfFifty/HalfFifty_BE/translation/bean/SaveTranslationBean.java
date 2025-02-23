@@ -24,7 +24,7 @@ public class SaveTranslationBean {
     }
 
     // 번역 기록 저장
-    public ResponseTranslationGetDTO exec(UUID userId, String translationWord) {
+    public ResponseTranslationGetDTO exec(UUID userId, String translationWord, Double probability) {
         // 번역 객체 생성
         TranslationDAO translationDAO = createTranslationDAOBean.exec(userId, translationWord);
         if(translationDAO == null) return null;
@@ -33,6 +33,6 @@ public class SaveTranslationBean {
         saveTranslationDAOBean.exec(translationDAO);
 
         // 수화 번역 객체를 DTO로 변환해서 반환
-        return createTranslationDTOBean.exec(translationDAO);
+        return createTranslationDTOBean.exec(translationDAO, probability);
     }
 }

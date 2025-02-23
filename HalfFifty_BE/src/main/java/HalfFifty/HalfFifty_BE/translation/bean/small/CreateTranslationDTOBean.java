@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 public class CreateTranslationDTOBean {
 
     // 수화 번역 객체를 DTO로 변환해서 반환
-    public ResponseTranslationGetDTO exec(TranslationDAO translationDAO) {
+    public ResponseTranslationGetDTO exec(TranslationDAO translationDAO, Double probability) {
         return ResponseTranslationGetDTO.builder()
                 .translationId(translationDAO.getTranslationId())
                 .userId(translationDAO.getUserId())
                 .translationWord(translationDAO.getTranslationWord())
                 .createdAt(translationDAO.getCreatedAt())
+                .probability(probability)
                 .build();
     }
 }
