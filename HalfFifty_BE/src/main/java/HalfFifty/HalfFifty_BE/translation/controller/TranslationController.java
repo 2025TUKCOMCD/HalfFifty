@@ -14,7 +14,7 @@ import java.util.Map;
 @RequestMapping("/translation")
 @CrossOrigin("*")
 public class TranslationController {
-    private final TranslationService translationService;
+    TranslationService translationService;
 
     public TranslationController(TranslationService translationService) {
         this.translationService = translationService;
@@ -23,7 +23,7 @@ public class TranslationController {
     // 수화 번역 API
     @PostMapping
     public ResponseEntity<Map<String, Object>> translateSignLanguage(@RequestBody RequestSignLanguageDTO requestSignLanguageDTO) {
-        // Lambda를 통해 번역된 데이터 가져오기
+        // 번역된 데이터 가져오기
         ResponseTranslationGetDTO responseTranslationGetDTO = translationService.signLanguageTranslation(requestSignLanguageDTO);
 
         // 번역 성공 여부 확인
@@ -34,6 +34,8 @@ public class TranslationController {
         responseMap.put("success", success);
         responseMap.put("message", success ? "수화 번역 성공" : "수화 번역 실패");
         responseMap.put("translationId", success ? responseTranslationGetDTO.getTranslationId() : null);
+        responseMap.put("translatedWord", success ? responseTranslationGetDTO.getTranslationWord() : null);
+        responseMap.put("probability", success ? responseTranslationGetDTO.getProbability() : null);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
     }
