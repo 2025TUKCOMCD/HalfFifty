@@ -8,25 +8,29 @@
 import SwiftUI
 
 struct FAQView: View {
-    @State private var selectedQuestion: Int? = nil
-    let faqs: [(question: String, answer: String)] = [
-        ("카메라로 얼굴을 인식하면 도용 관련 문제는 없나요?", "얼굴 인식 기술은 매우 편리하지만, 도용에 대한 걱정이 있을 수 있습니다.\n이를 방지하기 위해 저희는 사진이나 영상으로 인증이 되지 않도록 3D 얼굴 인식이나 센도 카메라 같은 안전한 기술을 사용하고 있습니다. 또한 얼굴 인식 외에도 비밀번호나 OTP 같은 추가 인증 방식을 적용해 보안을 더욱 강화하고 있습니다.\n고객님의 정보는 법적으로 안전하게 보호되며, 안심하고 서비스를 이용하실 수 있도록 최선을 다하고 있습니다."),
-        ("카메라로 얼굴을 인식하면 도용 관련 문제는 없나요? 질문이 길어지면 어떡하죠?", "얼굴 인식 기술은 매우 편리하지만, 도용에 대한 걱정이 있을 수 있습니다.\n이를 방지하기 위해 저희는 사진이나 영상으로 인증이 되지 않도록 3D 얼굴 인식이나 센도 카메라 같은 안전한 기술을 사용하고 있습니다.")
-    ]
+    @StateObject private var viewModel = FAQViewModel()
+    @State private var selectedQuestion: UUID? = nil
     
     var body: some View {
         VStack {
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(faqs.indices, id: \.self) { index in
-                        FAQItemView(
-                            question: faqs[index].question,
-                            answer: faqs[index].answer,
-                            isExpanded: selectedQuestion == index
-                        )
-                        .onTapGesture {
-                            withAnimation {
-                                selectedQuestion = selectedQuestion == index ? nil : index
+            if viewModel.faqs.isEmpty {
+                Spacer()
+                Text("FAQ가 없습니다.")
+                    .foregroundColor(.gray)
+                Spacer()
+            } else {
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(viewModel.faqs, id: \..faqId) { faq in
+                            FAQItemView(
+                                question: faq.question,
+                                answer: faq.answer,
+                                isExpanded: selectedQuestion == faq.faqId
+                            )
+                            .onTapGesture {
+                                withAnimation {
+                                    selectedQuestion = selectedQuestion == faq.faqId ? nil : faq.faqId
+                                }
                             }
                         }
                     }
@@ -36,9 +40,7 @@ struct FAQView: View {
             
             Spacer()
             
-            Button(action: {
-                // 질문하기 버튼 동작 추가 가능
-            }) {
+            NavigationLink(destination: InquiryView()) {
                 Text("질문하기")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
@@ -53,6 +55,9 @@ struct FAQView: View {
         .background(Color(UIColor.systemGray6))
         .navigationTitle("FAQ")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.fetchFAQ()
+        }
     }
 }
 
@@ -64,7 +69,7 @@ struct FAQItemView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Q. \(question)")
+                Text("\(question)")
                     .font(.system(size: 16, weight: .bold))
                 
                 Spacer()
@@ -87,6 +92,55 @@ struct FAQItemView: View {
         .cornerRadius(10)
         .shadow(color: Color.gray.opacity(0.2), radius: 4, x: 0, y: 2)
     }
+}
+
+class FAQViewModel: ObservableObject {
+    @Published var faqs: [FAQ] = []
+    @Published var isLoading = false
+    
+    func fetchFAQ() {
+        guard let url = URL(string: "http://54.180.92.32/FAQ") else { return }
+        
+        isLoading = true
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    print("FAQ 불러오기 오류: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(FAQResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.faqs = decodedResponse.FAQList
+                    } else {
+                        print("FAQ 불러오기 실패: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("디코딩 오류: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+}
+
+struct FAQResponse: Codable {
+    let success: Bool
+    let message: String
+    let FAQList: [FAQ]
+}
+
+struct FAQ: Codable, Identifiable {
+    let faqId: UUID
+    let question: String
+    let answer: String
+    
+    var id: UUID { faqId }
 }
 
 #Preview {
