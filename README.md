@@ -122,6 +122,13 @@
 - [notion link](https://sapphire-dewberry-222.notion.site/11fe3708109e8152ab71f29220051b6d?pvs=4)
 <br>
 
+## 📱 Prototype 📱
+### Mobile
+![GIFMaker_me (3)](https://github.com/user-attachments/assets/c03966f9-850f-406d-b2e5-8002ac8411f6)
+
+### Watch
+![watch](https://github.com/user-attachments/assets/387b9c04-7fe8-468a-a1bd-758ed9dad192)
+
 ## 🚨 회의 🚨
 - [3학년 2학기] 정기회의: 화요일 22시 30분
 - [3학년 겨울학기] 정기회의: 목요일 22시, 데일리 스크럼: 12시
