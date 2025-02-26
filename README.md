@@ -124,7 +124,9 @@
 
 ## 📱 Prototype 📱
 ### Mobile
-![GIFMaker_me (3)](https://github.com/user-attachments/assets/c03966f9-850f-406d-b2e5-8002ac8411f6)
+![Feb-26-2025 13-53-29](https://github.com/user-attachments/assets/7fad2e16-73b5-4e69-83ec-469d124a1bae)
+![Feb-26-2025 13-53-36](https://github.com/user-attachments/assets/5b4e5502-70ef-4911-b3ff-500ac6a26ea3)
+![Feb-26-2025 13-53-41](https://github.com/user-attachments/assets/e874f773-fb0a-4894-a218-479146775ad7)
 
 ### Watch
 ![watch](https://github.com/user-attachments/assets/387b9c04-7fe8-468a-a1bd-758ed9dad192)
