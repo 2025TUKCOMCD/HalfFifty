@@ -1,6 +1,7 @@
 package HalfFifty.HalfFifty_BE.translation.controller;
 
 import HalfFifty.HalfFifty_BE.translation.domain.DTO.RequestSignLanguageDTO;
+import HalfFifty.HalfFifty_BE.translation.domain.DTO.RequestTranslationDeleteDTO;
 import HalfFifty.HalfFifty_BE.translation.domain.DTO.ResponseTranslationGetDTO;
 import HalfFifty.HalfFifty_BE.translation.service.TranslationService;
 import org.springframework.http.HttpStatus;
@@ -38,5 +39,20 @@ public class TranslationController {
         responseMap.put("probability", success ? responseTranslationGetDTO.getProbability() : null);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Map<String, Object>> deleteTranslation(@RequestBody RequestTranslationDeleteDTO requestTranslationDeleteDTO) {
+        // 번역 기록 삭제 성공 여부
+        boolean success = translationService.deleteTranslation(requestTranslationDeleteDTO);
+
+        // Map을 통해 메시지 값 json 데이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "번역 기록 삭제 성공" : "번역 기록 삭제 실패");
+
+        // status, body 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+
     }
 }
