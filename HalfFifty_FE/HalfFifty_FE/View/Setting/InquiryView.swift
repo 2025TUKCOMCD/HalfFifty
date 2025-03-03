@@ -9,6 +9,8 @@ import SwiftUI
 
 struct InquiryView: View {
     @State private var questionText: String = ""
+    @StateObject private var viewModel = AQViewModel()
+    @Environment(\.presentationMode) var presentationMode // 화면 닫기용
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -45,14 +47,16 @@ struct InquiryView: View {
             
             // 질문하기 버튼
             Button(action: {
-                // 질문 제출 기능 추가 가능
+                viewModel.saveAQ(userId: "9f373112-8e93-4444-a403-a986f8bea4a3", question: questionText) {
+                    presentationMode.wrappedValue.dismiss() // 성공 시 화면 닫기
+                }
             }) {
                 Text("질문하기")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(questionText.isEmpty ? Color.gray.opacity(0.5) : Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                    .background(questionText.isEmpty ? Color.gray.opacity(0.5) : Color.blue)
                     .cornerRadius(8)
             }
             .disabled(questionText.isEmpty)
@@ -63,6 +67,47 @@ struct InquiryView: View {
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle("질문하기")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+extension AQViewModel {
+    func saveAQ(userId: String, question: String, completion: @escaping () -> Void) {
+        guard let url = URL(string: "http://54.180.92.32/AQ") else { return }
+        
+        let requestData: [String: Any] = [
+            "userId": userId,
+            "question": question
+        ]
+        
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: requestData) else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("질문 등록 오류: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(AQResponse.self, from: data)
+                    if decodedResponse.success {
+                        print("질문 등록 성공: \(decodedResponse.message)")
+                        completion() // 성공 시 화면 닫기
+                    } else {
+                        print("질문 등록 실패: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("디코딩 오류: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
     }
 }
 
