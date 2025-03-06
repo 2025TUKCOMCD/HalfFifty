@@ -20,11 +20,13 @@ class CameraViewController: UIViewController {
     private var videoOutput: AVCaptureVideoDataOutput!
     
     private let overlayView = UIImageView() // 랜드마크 및 연결선 표시용 레이어
+    private let maxFrames = 30
+    private var keypointsBuffer: [[Double]] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupCamera() // 카메라 설정
-        setupHandLandmarker() // Mediapipe HandLandmarker 설정
+        setupCamera()
+        setupHandLandmarker()
         setupOverlayView()
     }
     
@@ -300,8 +302,85 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         
         DispatchQueue.main.async {
             self.drawHandLandmarks(result)
+            
+            // 키포인트 추출 후 저장
+            let keypoints = self.extractKeypoints(from: result)
+            self.keypointsBuffer.append(keypoints)
+            
+            if self.keypointsBuffer.count >= self.maxFrames {
+                self.sendTranslationRequest(with: self.keypointsBuffer)
+                self.keypointsBuffer.removeAll()
+            }
         }
     }
+    
+    private func extractKeypoints(from result: HandLandmarkerResult) -> [Double] {
+        return result.landmarks.flatMap { hand in
+            hand.flatMap { landmark in
+                [Double(landmark.x), Double(landmark.y), Double(landmark.z)]
+            }
+        }
+    }
+    
+    private func sendTranslationRequest(with keypoints: [[Double]]) {
+        guard let url = URL(string: "http://54.180.92.32/translation") else {
+            print("URL이 잘못되었습니다.")
+            return
+        }
+
+        let requestBody: [String: Any] = [
+            "keypoints": keypoints
+        ]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = jsonData
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("네트워크 요청 실패: \(error.localizedDescription)")
+                    return
+                }
+
+                guard let data = data else {
+                    print("응답 데이터가 없습니다.")
+                    return
+                }
+
+                do {
+                    let decodedResponse = try JSONDecoder().decode(TranslationResponse.self, from: data)
+                    DispatchQueue.main.async {
+                        self.showTranslationResult(response: decodedResponse)
+                    }
+                } catch {
+                    print("JSON 디코딩 오류: \(error.localizedDescription)")
+                }
+            }.resume()
+        } catch {
+            print("JSON 변환 오류: \(error.localizedDescription)")
+        }
+    }
+    
+    // 번역 결과를 UI에 표시하는 함수 추가
+    private func showTranslationResult(response: TranslationResponse) {
+        guard let translatedWord = response.translatedWord else {
+            print("번역 실패: \("알 수 없는 오류")")
+            return
+        }
+        
+        let alert = UIAlertController(title: "번역 결과", message: translatedWord, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        self.present(alert, animated: true)
+    }
+}
+
+// API 응답 구조체
+struct TranslationResponse: Codable {
+    let success: Bool
+    let translatedWord: String?
 }
 
 // AVCaptureVideoDataOutputSampleBufferDelegate 구현
