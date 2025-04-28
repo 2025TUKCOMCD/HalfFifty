@@ -23,6 +23,7 @@ class CameraViewController: UIViewController {
     private let maxFrames = 30
     private var keypointsBuffer: [[[[Double]]]] = []
     private let minimumHandConfidence: Float = 0.8 // 손 인식 확신 기준
+    private var lastTranslatedWord: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -410,16 +411,25 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
             print("번역 실패")
             return
         }
+        
+        // 직전 단어와 같으면 무시
+        if translatedWord == lastTranslatedWord {
+            print("같은 단어 반복됨 -> 무시: \(translatedWord)")
+            return
+        }
 
         print("번역 결과 알림 보냄: \(translatedWord)")
 
+        // NotificationCenter로 전송
         NotificationCenter.default.post(
             name: Notification.Name("TranslationResult"),
             object: nil,
             userInfo: ["translatedWord": translatedWord]
         )
-    }
 
+        // 최근 번역 단어 업데이트
+        lastTranslatedWord = translatedWord
+    }
 }
 
 // API 응답 구조체
