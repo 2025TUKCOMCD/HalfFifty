@@ -62,7 +62,7 @@ struct ContentView: View {
                                         }
                                     }
                                 }
-                                userViewModel.fetchUser(userId: "9f373112-8e93-4444-a403-a986f8bea4a3")
+                                userViewModel.fetchUser(userId: "1f273112-8e93-4444-a403-a986f8bea4a2")
                             }
                     }
                 }
