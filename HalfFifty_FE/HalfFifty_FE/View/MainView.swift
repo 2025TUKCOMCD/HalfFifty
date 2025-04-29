@@ -17,6 +17,7 @@ struct MainView: View {
     @State private var text: String = "" // 번역할 문장
     @State var useMicrophone: Bool = false // 음성 입력 사용 여부
     @State private var cameraFrame: CGRect = .zero // 카메라 크기 저장
+    @State private var translationResultList: [String] = [] // 번역 결과 리스트
 
     var body: some View {
         GeometryReader { geometry in
