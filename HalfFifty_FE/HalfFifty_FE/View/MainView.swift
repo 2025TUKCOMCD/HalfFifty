@@ -303,6 +303,12 @@ struct MainView: View {
                 .padding(10)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TranslationResult"))) { notification in
+            if let translatedWord = notification.userInfo?["translatedWord"] as? String {
+                self.translationResultList.append(translatedWord)
+            }
+        }
+
         .navigationBarBackButtonHidden(true) // 기본 "< Back" 버튼 숨김
         .onAppear {
             checkCameraAuthorizationStatus()
