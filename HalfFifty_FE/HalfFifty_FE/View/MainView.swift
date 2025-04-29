@@ -243,17 +243,23 @@ struct MainView: View {
                         .cornerRadius(8)
                         .shadow(radius: 2)
                         
-                        if(!self.useCamera || !self.onCamera) {
-                            // 안내 문구 영역
-                            VStack {
-                                Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 16))
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
-                            .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
+                        if (!self.useCamera || !self.onCamera) {
+                                VStack {
+                                    Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 16))
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
+                                .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
+                                .cornerRadius(8)
+                                .shadow(radius: 2)
+                        } else {
+                            ChipsTranslationResultView(items: translationResultList)
+                                .padding()
+                                .frame(maxWidth: .infinity, maxHeight: 150)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .shadow(radius: 2)
                         }
                     } else {
                         // 번역할 내용 입력창
