@@ -4,3 +4,9 @@ use_frameworks!
 target 'HalfFifty_FE' do
   pod 'MediaPipeTasksVision'
 end
+
+target 'HalfFifty_Watch Watch App' do
+  platform :watchos, '9.0'
+  use_frameworks!
+
+end
