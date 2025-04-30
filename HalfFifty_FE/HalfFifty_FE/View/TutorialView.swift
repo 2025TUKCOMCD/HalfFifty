@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TutorialView: View {
-    private let images = ["tutorial-1", "tutorial-2", "tutorial-3"]
+    private let images = ["tutorial-1", "tutorial-2"]
     @State private var currentIndex = 0
     @Binding var showTutorialView: Bool
 
