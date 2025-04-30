@@ -17,6 +17,7 @@ struct MainView: View {
     @State private var text: String = "" // 번역할 문장
     @State var useMicrophone: Bool = false // 음성 입력 사용 여부
     @State private var cameraFrame: CGRect = .zero // 카메라 크기 저장
+    @State private var translationResultList: [String] = [] // 번역 결과 리스트
 
     var body: some View {
         GeometryReader { geometry in
@@ -243,17 +244,23 @@ struct MainView: View {
                         .cornerRadius(8)
                         .shadow(radius: 2)
                         
-                        if(!self.useCamera || !self.onCamera) {
-                            // 안내 문구 영역
-                            VStack {
-                                Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
-                                    .foregroundColor(.white)
-                                    .font(.system(size: 16))
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
-                            .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
+                        if (!self.useCamera || !self.onCamera) {
+                                VStack {
+                                    Text("카메라가 켜지면 해당 기능이 활성화됩니다.")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 16))
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: geometry.size.height / 6)
+                                .background(Color(red: 0.8509803921568627, green: 0.8509803921568627, blue: 0.8509803921568627))
+                                .cornerRadius(8)
+                                .shadow(radius: 2)
+                        } else {
+                            ChipsTranslationResultView(items: $translationResultList)
+                                .padding()
+                                .frame(maxWidth: .infinity, maxHeight: 150)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .shadow(radius: 2)
                         }
                     } else {
                         // 번역할 내용 입력창
@@ -297,6 +304,12 @@ struct MainView: View {
                 .padding(10)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TranslationResult"))) { notification in
+            if let translatedWord = notification.userInfo?["translatedWord"] as? String {
+                self.translationResultList.append(translatedWord)
+            }
+        }
+
         .navigationBarBackButtonHidden(true) // 기본 "< Back" 버튼 숨김
         .onAppear {
             checkCameraAuthorizationStatus()

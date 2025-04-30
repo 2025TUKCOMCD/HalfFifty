@@ -21,7 +21,9 @@ class CameraViewController: UIViewController {
     
     private let overlayView = UIImageView() // 랜드마크 및 연결선 표시용 레이어
     private let maxFrames = 30
-    private var keypointsBuffer: [[Double]] = []
+    private var keypointsBuffer: [[[[Double]]]] = []
+    private let minimumHandConfidence: Float = 0.8 // 손 인식 확신 기준
+    private var lastTranslatedWord: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -303,9 +305,24 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         DispatchQueue.main.async {
             self.drawHandLandmarks(result)
             
-            // 키포인트 추출 후 저장
-            let keypoints = self.extractKeypoints(from: result)
-            self.keypointsBuffer.append(keypoints)
+            // 손이 아예 없으면 버퍼 초기화
+            if result.landmarks.isEmpty {
+                print("손 인식 안됨 -> 버퍼 초기화")
+                self.keypointsBuffer.removeAll()
+                return
+            }
+            
+            // 손 인식 확신도 낮으면 버퍼 초기화
+            if !self.isHandDetectionConfident(result: result) {
+                print("손 인식 확신도 낮음 -> 버퍼 초기화")
+                self.keypointsBuffer.removeAll()
+                return
+            }
+            
+            // 모든 감지 결과를 즉시 저장
+            if let keypoints = self.extractKeypoints(from: result) {
+                self.keypointsBuffer.append(keypoints)
+            }
             
             if self.keypointsBuffer.count >= self.maxFrames {
                 self.sendTranslationRequest(with: self.keypointsBuffer)
@@ -314,15 +331,39 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         }
     }
     
-    private func extractKeypoints(from result: HandLandmarkerResult) -> [Double] {
-        return result.landmarks.flatMap { hand in
-            hand.flatMap { landmark in
-                [Double(landmark.x), Double(landmark.y), Double(landmark.z)]
+    private func isHandDetectionConfident(result: HandLandmarkerResult) -> Bool {
+        guard !result.handedness.isEmpty else {
+            return false
+        }
+        
+        for handScoreList in result.handedness {
+            if let firstScore = handScoreList.first, firstScore.score < minimumHandConfidence {
+                return false
             }
         }
+        
+        return true
     }
     
-    private func sendTranslationRequest(with keypoints: [[Double]]) {
+    private func extractKeypoints(from result: HandLandmarkerResult) -> [[[Double]]]? {
+        guard !result.landmarks.isEmpty else { return nil }
+        
+        var frameKeypoints: [[[Double]]] = [
+            Array(repeating: [0.0, 0.0, 0.0], count: 21), // 왼손
+            Array(repeating: [0.0, 0.0, 0.0], count: 21)  // 오른손
+        ]
+        
+        for (index, hand) in result.landmarks.enumerated() {
+            guard index < 2 else { break }
+            for (j, landmark) in hand.enumerated() {
+                frameKeypoints[index][j] = [Double(landmark.x), Double(landmark.y), Double(landmark.z)]
+            }
+        }
+        
+        return frameKeypoints
+    }
+    
+    private func sendTranslationRequest(with keypoints: [[[[Double]]]]) {
         guard let url = URL(string: "http://54.180.92.32/translation") else {
             print("URL이 잘못되었습니다.")
             return
@@ -367,13 +408,27 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
     // 번역 결과를 UI에 표시하는 함수 추가
     private func showTranslationResult(response: TranslationResponse) {
         guard let translatedWord = response.translatedWord else {
-            print("번역 실패: \("알 수 없는 오류")")
+            print("번역 실패")
             return
         }
         
-        let alert = UIAlertController(title: "번역 결과", message: translatedWord, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default))
-        self.present(alert, animated: true)
+        // 직전 단어와 같으면 무시
+        if translatedWord == lastTranslatedWord {
+            print("같은 단어 반복됨 -> 무시: \(translatedWord)")
+            return
+        }
+
+        print("번역 결과 알림 보냄: \(translatedWord)")
+
+        // NotificationCenter로 전송
+        NotificationCenter.default.post(
+            name: Notification.Name("TranslationResult"),
+            object: nil,
+            userInfo: ["translatedWord": translatedWord]
+        )
+
+        // 최근 번역 단어 업데이트
+        lastTranslatedWord = translatedWord
     }
 }
 
