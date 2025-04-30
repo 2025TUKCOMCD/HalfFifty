@@ -255,7 +255,7 @@ struct MainView: View {
                                 .cornerRadius(8)
                                 .shadow(radius: 2)
                         } else {
-                            ChipsTranslationResultView(items: translationResultList)
+                            ChipsTranslationResultView(items: $translationResultList)
                                 .padding()
                                 .frame(maxWidth: .infinity, maxHeight: 150)
                                 .background(Color.white)

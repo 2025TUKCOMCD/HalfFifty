@@ -8,28 +8,39 @@
 import SwiftUI
 
 public struct ChipsTranslationResultView: View {
-    let items: [String]
+    @Binding var items: [String]
     let horizontalSpacing: CGFloat
     let verticalSpacing: CGFloat
 
     public init(
-        items: [String],
+        items: Binding<[String]>,
         horizontalSpacing: CGFloat = 8,
         verticalSpacing: CGFloat = 8
     ) {
-        self.items = items
+        self._items = items
         self.horizontalSpacing = horizontalSpacing
         self.verticalSpacing = verticalSpacing
     }
 
     public var body: some View {
-        GeometryReader { geometry in
-            FlexibleView(
-                availableWidth: geometry.size.width,
-                data: items,
-                spacing: horizontalSpacing
-            ) { item in
-                ChipsView(title: item)
+        ZStack(alignment: .topTrailing) {
+            GeometryReader { geometry in
+                FlexibleView(
+                    availableWidth: geometry.size.width,
+                    data: items,
+                    spacing: horizontalSpacing
+                ) { item in
+                    ChipsView(title: item)
+                }
+            }
+
+            Button(action: {
+                items.removeAll() // 리스트 초기화
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.gray)
+                    .font(.system(size: 20))
+                    .padding(8)
             }
         }
     }
