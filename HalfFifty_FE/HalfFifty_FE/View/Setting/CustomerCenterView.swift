@@ -57,7 +57,7 @@ struct CustomerCenterView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemGray6))
         .onAppear {
-            viewModel.fetchAQ(userId: "9f373112-8e93-4444-a403-a986f8bea4a3")
+            viewModel.fetchAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2")
         }
     }
 }
