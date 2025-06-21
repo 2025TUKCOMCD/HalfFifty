@@ -3,6 +3,8 @@ package HalfFifty.HalfFifty_BE.user.service;
 import HalfFifty.HalfFifty_BE.user.bean.GetUserBean;
 import HalfFifty.HalfFifty_BE.user.bean.SaveUserBean;
 import HalfFifty.HalfFifty_BE.user.bean.UpdateUserBean;
+import HalfFifty.HalfFifty_BE.user.bean.LoginBean;
+import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserLoginDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserSaveDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserUpdateDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.ResponseUserGetDTO;
@@ -16,12 +18,14 @@ public class UserService {
     SaveUserBean saveUserBean;
     GetUserBean getUserBean;
     UpdateUserBean updateUserBean;
+    LoginBean loginBean;
 
     @Autowired
-    public UserService(SaveUserBean saveUserBean, GetUserBean getUserBean, UpdateUserBean updateUserBean) {
+    public UserService(SaveUserBean saveUserBean, GetUserBean getUserBean, UpdateUserBean updateUserBean, LoginBean loginBean) {
         this.saveUserBean = saveUserBean;
         this.getUserBean = getUserBean;
         this.updateUserBean = updateUserBean;
+        this.loginBean = loginBean;
     }
 
     // 유저 프로필 조회
@@ -37,5 +41,10 @@ public class UserService {
     // 유저 회원가입(임시)
     public UUID exec(RequestUserSaveDTO requestUserSaveDTO) {
         return saveUserBean.exec(requestUserSaveDTO);
+    }
+
+    // 유저 로그인
+    public UUID login(RequestUserLoginDTO requestUserLoginDTO) {
+        return loginBean.exec(requestUserLoginDTO);
     }
 }
