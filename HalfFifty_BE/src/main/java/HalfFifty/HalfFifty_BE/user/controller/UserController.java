@@ -1,5 +1,6 @@
 package HalfFifty.HalfFifty_BE.user.controller;
 
+import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserLoginDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserSaveDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.RequestUserUpdateDTO;
 import HalfFifty.HalfFifty_BE.user.domain.DTO.ResponseUserGetDTO;
@@ -73,6 +74,24 @@ public class UserController {
         Map<String, Object> requestMap = new HashMap<>();
         requestMap.put("success", success);
         requestMap.put("message", success ? "유저 회원가입 성공" : "유저 회원가입 생성 시 DAO 저장 실패");
+        requestMap.put("userId", userId);
+
+        // status, body 설정해서 응답 리턴
+        return ResponseEntity.status(HttpStatus.OK).body(requestMap);
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody RequestUserLoginDTO requestUserLoginDTO) {
+        // 유저 로그인 service
+        UUID userId = userService.login(requestUserLoginDTO);
+
+        // 유저 로그인 성공 여부
+        boolean success = userId != null;
+
+        // Map을 통해 메시지와 id 값 json 테이터로 변환
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("success", success);
+        requestMap.put("message", success ? "유저 로그인 성공" : "유저 로그인 실패");
         requestMap.put("userId", userId);
 
         // status, body 설정해서 응답 리턴

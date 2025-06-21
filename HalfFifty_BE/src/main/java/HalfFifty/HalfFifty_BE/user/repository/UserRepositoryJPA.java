@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepositoryJPA extends JpaRepository<UserDAO, UUID> {
+    UserDAO findByAppleIdAndPassword(String appleId, String password);
 }

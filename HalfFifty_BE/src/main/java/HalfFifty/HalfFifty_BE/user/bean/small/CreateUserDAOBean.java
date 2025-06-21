@@ -12,7 +12,6 @@ public class CreateUserDAOBean {
     // 유저 객체 생성
     public UserDAO exec(RequestUserSaveDTO requestUserSaveDTO) {
         return UserDAO.builder()
-                .userId(UUID.randomUUID())
                 .appleId(requestUserSaveDTO.getAppleId())
                 .password(requestUserSaveDTO.getPassword())
                 .username(requestUserSaveDTO.getUsername())

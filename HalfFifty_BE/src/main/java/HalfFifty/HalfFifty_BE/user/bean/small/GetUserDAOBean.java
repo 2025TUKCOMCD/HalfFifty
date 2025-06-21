@@ -20,4 +20,8 @@ public class GetUserDAOBean {
     public UserDAO exec(UUID userId) {
         return userRepositoryJPA.findById(userId).orElse(null);
     }
+
+    public UserDAO exec(String appleId, String password) {
+        return userRepositoryJPA.findByAppleIdAndPassword(appleId, password);
+    }
 }
