@@ -13,12 +13,14 @@ public struct FlexibleView<Data: Collection, Content: View>: View where Data.Ele
     let spacing: CGFloat
     let alignment: HorizontalAlignment
     let content: (Data.Element) -> Content
+    let onRowsExceedLimit: ((Int) -> Void)? // 필요시 줄 수 넘기 알림
 
     public init(
         availableWidth: CGFloat,
         data: Data,
         spacing: CGFloat = 8,
         alignment: HorizontalAlignment = .leading,
+        onRowsExceedLimit: ((Int) -> Void)? = nil,
         @ViewBuilder content: @escaping (Data.Element) -> Content
     ) {
         self.availableWidth = availableWidth
@@ -26,15 +28,22 @@ public struct FlexibleView<Data: Collection, Content: View>: View where Data.Ele
         self.spacing = spacing
         self.alignment = alignment
         self.content = content
+        self.onRowsExceedLimit = onRowsExceedLimit
     }
 
     public var body: some View {
         let rows = generateRows()
 
+        if let onRowsExceedLimit {
+            DispatchQueue.main.async {
+                onRowsExceedLimit(rows.count)
+            }
+        }
+
         return VStack(alignment: alignment, spacing: spacing) {
-            ForEach(0..<rows.count, id: \.self) { rowIndex in
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: spacing) {
-                    ForEach(rows[rowIndex], id: \.self) { item in
+                    ForEach(Array(row.enumerated()), id: \.offset) { _, item in
                         content(item)
                     }
                 }
@@ -46,7 +55,7 @@ public struct FlexibleView<Data: Collection, Content: View>: View where Data.Ele
         var rows: [[Data.Element]] = [[]]
         var currentRowWidth: CGFloat = 0
 
-        for item in data {
+        for item in data.reversed() {
             let itemWidth = measureItemWidth(item)
 
             if currentRowWidth + itemWidth + spacing > availableWidth {

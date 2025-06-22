@@ -46,7 +46,7 @@ struct CustomerCenterView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }

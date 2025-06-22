@@ -47,10 +47,6 @@ struct MenuView: View {
                     }) {
                         MenuItem(icon: "house", text: "홈")
                     }
-
-//                    NavigationLink(destination: Text("history")) {
-//                        MenuItem(icon: "clock.arrow.trianglehead.counterclockwise.rotate.90", text: "번역 기록")
-//                    }
                     
                     NavigationLink(destination: UserView(userViewModel: userViewModel)) { // ViewModel 전달
                         MenuItem(icon: "person", text: "사용자 정보")

@@ -48,7 +48,7 @@ struct InquiryView: View {
 
             // 질문하기 버튼
             Button(action: {
-                viewModel.saveAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2", question: questionText) {_ in 
+                viewModel.saveAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2", question: questionText) {_ in
                     presentationMode.wrappedValue.dismiss() // 성공 시 화면 닫기
                 }
             }) {
@@ -57,7 +57,7 @@ struct InquiryView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(questionText.isEmpty ? Color.gray.opacity(0.5) : Color.blue)
+                    .background(questionText.isEmpty ? Color.gray.opacity(0.5) : Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
                     .cornerRadius(8)
             }
             .disabled(questionText.isEmpty)
