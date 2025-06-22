@@ -23,7 +23,9 @@ class CameraViewController: UIViewController {
     private let maxFrames = 30
     private var keypointsBuffer: [[[[Double]]]] = []
     private let minimumHandConfidence: Float = 0.8 // 손 인식 확신 기준
-    private var lastTranslatedWord: String?
+    
+    private var requestQueue: [[[ [ [Double] ] ]]] = [] // 요청 대기열
+    private var isRequesting: Bool = false // 요청 중 여부
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -305,21 +307,19 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         DispatchQueue.main.async {
             self.drawHandLandmarks(result)
             
-            // 손이 아예 없으면 버퍼 초기화
             if result.landmarks.isEmpty {
                 print("손 인식 안됨 -> 버퍼 초기화")
                 self.keypointsBuffer.removeAll()
                 return
             }
             
-            // 손 인식 확신도 낮으면 버퍼 초기화
             if !self.isHandDetectionConfident(result: result) {
                 print("손 인식 확신도 낮음 -> 버퍼 초기화")
                 self.keypointsBuffer.removeAll()
                 return
             }
             
-            // 모든 감지 결과를 즉시 저장
+            // 모든 인식 결과를 즉시 저장
             if let keypoints = self.extractKeypoints(from: result) {
                 self.keypointsBuffer.append(keypoints)
             }
@@ -364,14 +364,23 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
     }
     
     private func sendTranslationRequest(with keypoints: [[[[Double]]]]) {
+        requestQueue.append(keypoints)
+        processNextRequestIfNeeded()
+    }
+
+    private func processNextRequestIfNeeded() {
+        guard !isRequesting, !requestQueue.isEmpty else { return }
+
+        isRequesting = true
+        let currentKeypoints = requestQueue.removeFirst()
+
         guard let url = URL(string: "http://54.180.92.32/translation") else {
             print("URL이 잘못되었습니다.")
+            isRequesting = false
             return
         }
 
-        let requestBody: [String: Any] = [
-            "keypoints": keypoints
-        ]
+        let requestBody: [String: Any] = ["keypoints": currentKeypoints]
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
@@ -381,6 +390,13 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
             request.httpBody = jsonData
 
             URLSession.shared.dataTask(with: request) { data, response, error in
+                defer {
+                    DispatchQueue.main.async {
+                        self.isRequesting = false
+                        self.processNextRequestIfNeeded() // 다음 요청 진행
+                    }
+                }
+
                 if let error = error {
                     print("네트워크 요청 실패: \(error.localizedDescription)")
                     return
@@ -402,33 +418,23 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
             }.resume()
         } catch {
             print("JSON 변환 오류: \(error.localizedDescription)")
+            isRequesting = false
         }
     }
     
     // 번역 결과를 UI에 표시하는 함수 추가
     private func showTranslationResult(response: TranslationResponse) {
         guard let translatedWord = response.translatedWord else {
-            print("번역 실패")
+            print("번역 실패: 알 수 없는 오류")
             return
         }
         
-        // 직전 단어와 같으면 무시
-        if translatedWord == lastTranslatedWord {
-            print("같은 단어 반복됨 -> 무시: \(translatedWord)")
-            return
-        }
-
-        print("번역 결과 알림 보냄: \(translatedWord)")
-
-        // NotificationCenter로 전송
+        // 결과를 NotificationCenter로 전달
         NotificationCenter.default.post(
             name: Notification.Name("TranslationResult"),
             object: nil,
             userInfo: ["translatedWord": translatedWord]
         )
-
-        // 최근 번역 단어 업데이트
-        lastTranslatedWord = translatedWord
     }
 }
 

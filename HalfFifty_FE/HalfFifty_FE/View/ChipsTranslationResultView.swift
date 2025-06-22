@@ -34,13 +34,14 @@ public struct ChipsTranslationResultView: View {
                 }
             }
 
+            // 'X' 버튼
             Button(action: {
                 items.removeAll() // 리스트 초기화
             }) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.gray)
                     .font(.system(size: 20))
-                    .padding(8)
+                    .padding(2)
             }
         }
     }
