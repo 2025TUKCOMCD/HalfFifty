@@ -8,15 +8,12 @@
 import SwiftUI
 
 struct CustomerCenterView: View {
-    @State private var questions: [Question] = [
-//        Question(id: 1, date: "2025.01.07", status: .answered, question: "카메라로 얼굴을 인식하면 도용 관련 문제는 없나요?", answer: "얼굴 인식 기술은 매우 편리하지만, 도용에 대한 걱정이 있을 수 있습니다.\n이를 방지하기 위해 저희는 사진이나 영상으로는 인증이 되지 않도록 3D 얼굴 인식이나 심도 카메라 같은 안전한 기술을 사용하고 있습니다."),
-//        Question(id: 2, date: "2025.01.07", status: .pending, question: "카메라로 얼굴을 인식하면 도용 관련 문제는 없나요?", answer: nil)
-    ]
-    @State private var selectedQuestionID: Int? = nil
+    @StateObject private var viewModel = AQViewModel()
+    @State private var selectedQuestionID: UUID? = nil
     
     var body: some View {
         VStack {
-            if questions.isEmpty {
+            if viewModel.aqs.isEmpty {
                 Spacer()
                 Text("질문이 존재하지 않습니다")
                     .font(.system(size: 16))
@@ -25,14 +22,14 @@ struct CustomerCenterView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(questions) { question in
+                        ForEach(viewModel.aqs) { aq in
                             QuestionRow(
-                                question: question,
-                                isExpanded: selectedQuestionID == question.id
+                                question: aq,
+                                isExpanded: selectedQuestionID == aq.aqId
                             )
                             .onTapGesture {
                                 withAnimation {
-                                    selectedQuestionID = selectedQuestionID == question.id ? nil : question.id
+                                    selectedQuestionID = selectedQuestionID == aq.aqId ? nil : aq.aqId
                                 }
                             }
                         }
@@ -59,28 +56,33 @@ struct CustomerCenterView: View {
         .navigationTitle("고객센터")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemGray6))
+        .onAppear {
+            viewModel.fetchAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2")
+        }
     }
 }
 
 struct QuestionRow: View {
-    let question: Question
+    let question: AQ
     let isExpanded: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(question.status.rawValue)
+                Text(question.isAnswer ? "답변완료" : "답변예정")
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
                 
-                Text(" | \(question.date)")
+                Text(" | \(formattedDate(question.questionCreatedAt))")
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
                 
                 Spacer()
                 
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .foregroundColor(.gray)
+                if question.isAnswer {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(.gray)
+                }
             }
             
             Text("Q. \(question.question)")
@@ -101,17 +103,70 @@ struct QuestionRow: View {
     }
 }
 
-struct Question: Identifiable {
-    let id: Int
-    let date: String
-    let status: QuestionStatus
-    let question: String
-    let answer: String?
+class AQViewModel: ObservableObject {
+    @Published var aqs: [AQ] = []
+    @Published var isLoading = false
+    
+    func fetchAQ(userId: String) {
+        guard let url = URL(string: "http://54.180.92.32/AQ/user/\(userId)") else { return }
+        
+        isLoading = true
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    print("AQ 불러오기 오류: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let data = data else { return }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(AQResponse.self, from: data)
+                    if decodedResponse.success {
+                        self.aqs = decodedResponse.AQList
+                    } else {
+                        print("AQ 불러오기 실패: \(decodedResponse.message)")
+                    }
+                } catch {
+                    print("디코딩 오류: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
 }
 
-enum QuestionStatus: String {
-    case answered = "답변완료"
-    case pending = "답변예정"
+struct AQResponse: Codable {
+    let success: Bool
+    let message: String
+    let AQList: [AQ]
+}
+
+struct AQ: Codable, Identifiable {
+    let aqId: UUID
+    let question: String
+    let answer: String?
+    let questionCreatedAt: String
+    let answerCreatedAt: String?
+    let isAnswer: Bool
+    
+    var id: UUID { aqId }
+}
+
+func formattedDate(_ dateString: String) -> String {
+    let inputFormatter = DateFormatter()
+    inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+    inputFormatter.locale = Locale(identifier: "ko_KR")
+    inputFormatter.timeZone = TimeZone(abbreviation: "KST")
+    
+    if let date = inputFormatter.date(from: dateString) {
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy.MM.dd"
+        return outputFormatter.string(from: date)
+    }
+    return "날짜 오류"
 }
 
 #Preview {
