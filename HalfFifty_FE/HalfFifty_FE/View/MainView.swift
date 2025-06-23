@@ -233,7 +233,10 @@ struct MainView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TranslationResult"))) { notification in
             if let translatedWord = notification.userInfo?["translatedWord"] as? String {
-                self.translationResultList.append(translatedWord)
+                // 같은 단어 필터링
+                if self.translationResultList.last != translatedWord {
+                    self.translationResultList.append(translatedWord)
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
