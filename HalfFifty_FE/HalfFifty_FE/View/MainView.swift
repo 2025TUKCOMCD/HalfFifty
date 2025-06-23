@@ -236,6 +236,11 @@ struct MainView: View {
                 // 같은 단어 필터링
                 if self.translationResultList.last != translatedWord {
                     self.translationResultList.append(translatedWord)
+
+                    // 번역 결과 최대 개수 지정
+                    if self.translationResultList.count > 10 {
+                        self.translationResultList.removeFirst()
+                    }
                 }
             }
         }
