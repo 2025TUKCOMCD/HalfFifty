@@ -7,12 +7,15 @@
 
 import SwiftUI
 import UserNotifications
+import WatchConnectivity
+import WatchKit
 
 struct ContentView: View {
     @State private var inputText: String = ""
-    @ObservedObject private var notificationManager = WatchNotificationManager.shared
-    private let recorder = AudioRecorderManager.shared
-    @State private var keywords: [Keyword] = []
+    @StateObject private var wcDelegate = WatchSessionDelegate()
+    
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     var body: some View {
         NavigationView {
@@ -35,11 +38,10 @@ struct ContentView: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
                 } onSubmit: { newText in
                     inputText = newText
-                    checkForMatchingKeywords(text: newText) // 키워드와 매칭 확인
                 }
                 .buttonStyle(PlainButtonStyle())
 
-                NavigationLink(destination: KeywordView(keywords: $keywords)) {
+                NavigationLink(destination: KeywordView()) {
                     HStack(spacing: 8) {
                         ZStack {
                             Circle()
@@ -57,63 +59,62 @@ struct ContentView: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.gray).opacity(0.3))
                 }
                 .buttonStyle(PlainButtonStyle())
-
-                // 변환된 텍스트 표시
-                Text("STT 결과: \(notificationManager.receivedSTTResult)")
-                    .foregroundColor(.blue)
-                    .padding()
             }
             .padding()
             .navigationTitle("手다쟁이")
-            .onAppear {
-                recorder.startRecordingLoop()
-                fetchKeywords()
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("키워드 알림"), message: Text(alertMessage), dismissButton: .default(Text("확인")))
+            }
+        }
+        .onAppear {
+            wcDelegate.activateSession()
+            wcDelegate.onKeywordReceived = { keyword in
+                alertMessage = "'\(keyword)' 키워드가 감지되었습니다"
+                showAlert = true
+                WKInterfaceDevice.current().play(.notification)
             }
         }
     }
+}
+
+class WatchSessionDelegate: NSObject, ObservableObject, WCSessionDelegate {
+    var onKeywordReceived: ((String) -> Void)?
     
-    private func fetchKeywords() {
-        guard let url = URL(string: "http://54.180.92.32/keyword/user/9f373112-8e93-4444-a403-a986f8bea4a3") else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("Error fetching keywords: \(error.localizedDescription)")
-                    return
-                }
-                
-                guard let data = data else { return }
-                
-                do {
-                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
-                    if decodedResponse.success {
-                        self.keywords = decodedResponse.keywordList
-                    } else {
-                        print("Failed to fetch keywords: \(decodedResponse.message)")
-                    }
-                } catch {
-                    print("Decoding error: \(error.localizedDescription)")
-                }
-            }
-        }.resume()
+    func activateSession() {
+        if WCSession.isSupported() {
+            WCSession.default.delegate = self
+            WCSession.default.activate()
+        }
     }
-    
-    private func checkForMatchingKeywords(text: String) {
-        for keyword in keywords {
-            if text.contains(keyword.keyword) {
-                sendAlert(for: keyword.keyword)
-                break
+
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        if let error = error {
+            print("WCSession 활성화 실패: \(error.localizedDescription)")
+        } else {
+            print("WCSession 활성화 성공")
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        if let keyword = message["keyword"] as? String {
+            print("워치에서 키워드 수신: \(keyword)")
+            DispatchQueue.main.async {
+                self.onKeywordReceived?(keyword)
             }
         }
     }
 
-    private func sendAlert(for keyword: String) {
-        let notificationContent = UNMutableNotificationContent()
-        notificationContent.title = "키워드 감지"
-        notificationContent.body = "감지된 키워드: \(keyword)"
-        notificationContent.sound = .default
-        
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: notificationContent, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        if session.isReachable {
+            print("iPhone과 연결됨 (reachable)")
+        } else {
+            print("iPhone과 연결 끊김 (not reachable)")
+        }
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }

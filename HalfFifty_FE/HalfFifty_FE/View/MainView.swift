@@ -79,7 +79,7 @@ struct MainView: View {
 
                             Spacer()
 
-                            Image(systemName: "arrow.left.arrow.right")
+                            Image(systemName: "arrow.right")
                                 .padding(.horizontal, 19)
                                 .padding(.vertical, 6)
                                 .background(Color.white)
@@ -233,7 +233,15 @@ struct MainView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TranslationResult"))) { notification in
             if let translatedWord = notification.userInfo?["translatedWord"] as? String {
-                self.translationResultList.append(translatedWord)
+                // 같은 단어 필터링
+                if self.translationResultList.last != translatedWord {
+                    self.translationResultList.append(translatedWord)
+
+                    // 번역 결과 최대 개수 지정
+                    if self.translationResultList.count > 10 {
+                        self.translationResultList.removeFirst()
+                    }
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
