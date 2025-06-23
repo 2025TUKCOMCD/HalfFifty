@@ -79,7 +79,7 @@ struct MainView: View {
 
                             Spacer()
 
-                            Image(systemName: "arrow.left.arrow.right")
+                            Image(systemName: "arrow.right")
                                 .padding(.horizontal, 19)
                                 .padding(.vertical, 6)
                                 .background(Color.white)
