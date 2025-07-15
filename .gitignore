@@ -4,3 +4,4 @@ Pods/
 *.xcuserdatad
 *.xcworkspace
 HalfFifty_FE/HalfFifty_FE/tasks/
+venv
