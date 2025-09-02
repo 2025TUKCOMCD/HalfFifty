@@ -58,8 +58,9 @@
 <br>
 
 ## 📍 Branch 전략 📍
-- main: 배포용 브랜치
 - develop: 기능 개발을 위한 브랜치
+- 작업에 따라 브랜치 생성 후 리뷰 후 develop에 merge
+  - 브랜치명: ```커밋유형/기능```
 <br>
 
 ## ✔️ Git Commit Mesage Convention ✔️
