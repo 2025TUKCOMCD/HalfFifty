@@ -108,6 +108,7 @@ struct MainView: View {
                                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                                 .cornerRadius(8)
                                 .shadow(radius: 2)
+                                .aspectRatio(3/4, contentMode: .fit)
                                 .background(GeometryReader { proxy in
                                     Color.clear
                                         .onAppear {
