@@ -125,7 +125,6 @@
 
 ## 📱 Prototype 📱
 ### Mobile
-![Feb-26-2025 13-53-29](https://github.com/user-attachments/assets/7fad2e16-73b5-4e69-83ec-469d124a1bae)
 ![Feb-26-2025 13-53-36](https://github.com/user-attachments/assets/5b4e5502-70ef-4911-b3ff-500ac6a26ea3)
 ![Feb-26-2025 13-53-41](https://github.com/user-attachments/assets/e874f773-fb0a-4894-a218-479146775ad7)
 
