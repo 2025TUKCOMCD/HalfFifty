@@ -26,7 +26,7 @@ struct CameraView: UIViewControllerRepresentable {
 
         if uiViewController.cameraFrame != cameraFrame {
             uiViewController.cameraFrame = cameraFrame
-            uiViewController.view.setNeedsLayout() // ← layout 업데이트 유도
+            uiViewController.view.setNeedsLayout()
         }
     }
 }

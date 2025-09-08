@@ -265,7 +265,6 @@ class CameraViewController: UIViewController {
                     y = overlayResolution.height - y
                 }
 
-                // ✅ 여기서 "가로 축소 / 세로 확대" 캘리브레이션 적용
                 x = (x - cx) * overlayScaleX + cx + overlayShiftX
                 y = (y - cy) * overlayScaleY + cy + overlayShiftY
 
