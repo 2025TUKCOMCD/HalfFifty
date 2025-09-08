@@ -20,14 +20,13 @@ struct CameraView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {
-        // 전면/후면 카메라 상태 변경 시 세션 재구성
         if uiViewController.isFrontCamera != isFrontCamera {
             uiViewController.switchCamera()
         }
-        
-        // 카메라 크기 업데이트
+
         if uiViewController.cameraFrame != cameraFrame {
             uiViewController.cameraFrame = cameraFrame
+            uiViewController.view.setNeedsLayout() // ← layout 업데이트 유도
         }
     }
 }

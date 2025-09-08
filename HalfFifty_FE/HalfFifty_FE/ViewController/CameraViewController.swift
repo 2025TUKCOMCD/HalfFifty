@@ -27,6 +27,14 @@ class CameraViewController: UIViewController {
     private var requestQueue: [[[ [ [Double] ] ]]] = [] // 요청 대기열
     private var isRequesting: Bool = false // 요청 중 여부
     
+    // Overlay 캘리브레이션
+    private var overlayScaleX: CGFloat = 0.92   // 가로 폭 줄이기
+    private var overlayScaleY: CGFloat = 2.0   // 세로 높이 늘리기
+
+    // 미세 위치 보정 (픽셀 단위, 우/하 이동)
+    private var overlayShiftX: CGFloat = 0.0
+    private var overlayShiftY: CGFloat = 80.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCamera()
@@ -218,65 +226,69 @@ class CameraViewController: UIViewController {
     
     // 랜드마크 및 연결선 그리기
     private func drawHandLandmarks(_ result: HandLandmarkerResult) {
-        let cameraResolution = videoPreviewLayer.bounds.size  // 카메라의 현재 해상도 기준
-        let overlayResolution = overlayView.bounds.size  // overlayView의 현재 크기 기준
-        
-        if cameraResolution.width == 0 || cameraResolution.height == 0 {
-            print("카메라 해상도 오류")
-            return
-        }
-        
+        let cameraResolution = videoPreviewLayer.bounds.size
+        let overlayResolution = overlayView.bounds.size
+        if cameraResolution.width == 0 || cameraResolution.height == 0 { return }
+
         UIGraphicsBeginImageContext(overlayResolution)
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        
         context.clear(CGRect(origin: .zero, size: overlayResolution))
         context.setStrokeColor(UIColor.green.cgColor)
         context.setLineWidth(2.0)
-        
-        // 비율 유지하기 위한 스케일 보정
-        let scaleX = overlayResolution.width / cameraResolution.width
+
+        // 캘리브레이션 중심(중앙 기준으로 스케일링해야 왜곡이 안 생김)
+        let cx = overlayResolution.width  * 0.5
+        let cy = overlayResolution.height * 0.5
+
+        // 비율 보정 계산(기존 코드 유지)
+        let scaleX = overlayResolution.width  / cameraResolution.width
         let scaleY = overlayResolution.height / cameraResolution.height
-        let minScale = min(scaleX, scaleY)  // 가장 작은 스케일을 선택하여 비율 유지
-        
+        let minScale = min(scaleX, scaleY)
+
         for hand in result.landmarks {
             var points: [CGPoint] = []
-            
+
             for landmark in hand {
-                var x = CGFloat(landmark.x) * cameraResolution.width * minScale
+                var x = CGFloat(landmark.x) * cameraResolution.width  * minScale
                 var y = (1 - CGFloat(landmark.y)) * cameraResolution.height * minScale
-                
+
                 if isFrontCamera {
-                    // 전면 카메라: 90도 오른쪽 회전
+                    // 전면: 90° 오른쪽 회전 (기존 로직 유지)
                     let tempX = x
                     x = overlayResolution.width - y
                     y = tempX
                 } else {
-                    // 후면 카메라: 90도 왼쪽 회전 + Y축 반전
+                    // 후면: 90° 왼쪽 회전 + Y축 반전 (기존 로직 유지)
                     let tempX = x
                     x = y
                     y = overlayResolution.height - tempX
                     y = overlayResolution.height - y
                 }
-                
+
+                // ✅ 여기서 "가로 축소 / 세로 확대" 캘리브레이션 적용
+                x = (x - cx) * overlayScaleX + cx + overlayShiftX
+                y = (y - cy) * overlayScaleY + cy + overlayShiftY
+
                 points.append(CGPoint(x: x, y: y))
-                
+
+                // 점 찍기
                 let circleRect = CGRect(x: x - 3, y: y - 3, width: 6, height: 6)
                 context.setFillColor(UIColor.red.cgColor)
                 context.fillEllipse(in: circleRect)
             }
-            
+
+            // 연결선
             for (startIndex, endIndex) in HandLandmarker.handConnections {
                 if startIndex < points.count, endIndex < points.count {
                     let start = points[startIndex]
                     let end = points[endIndex]
-                    
                     context.move(to: start)
                     context.addLine(to: end)
                     context.strokePath()
                 }
             }
         }
-        
+
         overlayView.image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
     }
@@ -374,7 +386,7 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         isRequesting = true
         let currentKeypoints = requestQueue.removeFirst()
 
-        guard let url = URL(string: "http://54.180.92.32/translation") else {
+        guard let url = URL(string: "http://3.34.3.103/translation") else {
             print("URL이 잘못되었습니다.")
             isRequesting = false
             return
