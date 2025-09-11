@@ -80,7 +80,7 @@ struct KeywordAddView: View {
     }
 
     private func addKeyword() {
-        guard let url = URL(string: "http://3.34.3.103/keyword"),
+        guard let url = URL(string: "\(userVM.baseUrl)keyword"),
               !tempKeyword.isEmpty,
               !userVM.userId.isEmpty else { return }
         
