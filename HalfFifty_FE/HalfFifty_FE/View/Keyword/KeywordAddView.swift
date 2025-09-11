@@ -15,9 +15,10 @@ struct UpdateKeywordResponse: Codable {
 
 struct KeywordAddView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var userVM: UserViewModel
+
     @State private var tempKeyword: String
     @State private var isLoading = false
-    @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
     
     var keywordId: UUID?
 
@@ -28,6 +29,8 @@ struct KeywordAddView: View {
 
     private var isSaveButtonEnabled: Bool {
         !tempKeyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && !userVM.userId.isEmpty
+        && !isLoading
     }
 
     var body: some View {
@@ -71,13 +74,15 @@ struct KeywordAddView: View {
                     Text("저장")
                         .foregroundColor(isSaveButtonEnabled ? .blue : .gray)
                 }
-                .disabled(!isSaveButtonEnabled || isLoading)
+                .disabled(!isSaveButtonEnabled)
             }
         }
     }
 
     private func addKeyword() {
-        guard let url = URL(string: "http://54.180.92.32/keyword"), !tempKeyword.isEmpty else { return }
+        guard let url = URL(string: "http://3.34.3.103/keyword"),
+              !tempKeyword.isEmpty,
+              !userVM.userId.isEmpty else { return }
         
         isLoading = true
         
@@ -86,10 +91,9 @@ struct KeywordAddView: View {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         let body: [String: Any] = [
-            "userId": userId,
+            "userId": userVM.userId,
             "keyword": tempKeyword
         ]
-        
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -97,30 +101,30 @@ struct KeywordAddView: View {
                 self.isLoading = false
                 
                 if let error = error {
-                    print("Error updating keyword: \(error.localizedDescription)")
+                    print("Error adding keyword: \(error.localizedDescription)")
                     return
                 }
-                
                 guard let data = data else { return }
                 
                 do {
-                    let decodedResponse = try JSONDecoder().decode(UpdateKeywordResponse.self, from: data)
-                    if decodedResponse.success {
-                        print("키워드 수정 성공: \(decodedResponse.keywordId?.uuidString ?? "")")
+                    let decoded = try JSONDecoder().decode(UpdateKeywordResponse.self, from: data)
+                    if decoded.success {
+                        print("키워드 추가 성공: \(decoded.keywordId?.uuidString ?? "")")
                         self.dismiss()
                     } else {
-                        print("키워드 수정 실패: \(decodedResponse.message)")
+                        print("키워드 추가 실패: \(decoded.message)")
                     }
                 } catch {
                     print("Decoding error: \(error.localizedDescription)")
                 }
             }
         }.resume()
-
     }
 
     private func updateKeyword(keywordId: UUID) {
-        guard let url = URL(string: "http://54.180.92.32/keyword"), !tempKeyword.isEmpty else { return }
+        guard let url = URL(string: "http://3.34.3.103/keyword"),
+              !tempKeyword.isEmpty,
+              !userVM.userId.isEmpty else { return }
         
         isLoading = true
         
@@ -130,10 +134,9 @@ struct KeywordAddView: View {
         
         let body: [String: Any] = [
             "keywordId": keywordId.uuidString,
-            "userId": userId,
+            "userId": userVM.userId,
             "keyword": tempKeyword
         ]
-        
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -144,16 +147,15 @@ struct KeywordAddView: View {
                     print("Error updating keyword: \(error.localizedDescription)")
                     return
                 }
-                
                 guard let data = data else { return }
                 
                 do {
-                    let decodedResponse = try JSONDecoder().decode(UpdateKeywordResponse.self, from: data)
-                    if decodedResponse.success {
-                        print("키워드 수정 성공: \(decodedResponse.keywordId?.uuidString ?? "")")
+                    let decoded = try JSONDecoder().decode(UpdateKeywordResponse.self, from: data)
+                    if decoded.success {
+                        print("키워드 수정 성공: \(decoded.keywordId?.uuidString ?? "")")
                         dismiss()
                     } else {
-                        print("키워드 수정 실패: \(decodedResponse.message)")
+                        print("키워드 수정 실패: \(decoded.message)")
                     }
                 } catch {
                     print("Decoding error: \(error.localizedDescription)")
@@ -166,5 +168,10 @@ struct KeywordAddView: View {
 #Preview {
     NavigationStack {
         KeywordAddView()
+            .environmentObject({
+                let vm = UserViewModel()
+                vm.userId = "5cbd5b33-833f-430a-97f3-96706b12ce7" // 미리보기용
+                return vm
+            }())
     }
 }

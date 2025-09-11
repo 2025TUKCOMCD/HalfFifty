@@ -78,6 +78,7 @@ struct ContentView: View {
                 .gesture(drag)
             }
         }
+        .environmentObject(userViewModel)
         // 앱 시작 시 이미 userId가 있다면 한 번만 조회
         .onAppear {
             if !userViewModel.userId.isEmpty && !didFetchUser {

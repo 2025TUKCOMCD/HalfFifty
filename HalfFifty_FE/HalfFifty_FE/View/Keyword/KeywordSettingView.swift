@@ -10,7 +10,6 @@ import SwiftUI
 struct Keyword: Identifiable, Codable {
     let keywordId: UUID
     let keyword: String
-    
     var id: UUID { keywordId }
 }
 
@@ -26,18 +25,15 @@ struct DeleteKeywordResponse: Codable {
 }
 
 struct KeywordSettingsView: View {
-    @State private var userId = "9f373112-8e93-4444-a403-a986f8bea4a3"
+    @EnvironmentObject var userVM: UserViewModel
+
     @State private var keywords: [Keyword] = []
     @State private var searchText = ""
     @State private var isLoading = false
     @State private var isEditing = false
 
-    var filteredKeywords: [Keyword] {
-        if searchText.isEmpty {
-            return keywords
-        } else {
-            return keywords.filter { $0.keyword.contains(searchText) }
-        }
+    private var filteredKeywords: [Keyword] {
+        searchText.isEmpty ? keywords : keywords.filter { $0.keyword.contains(searchText) }
     }
 
     var body: some View {
@@ -45,7 +41,15 @@ struct KeywordSettingsView: View {
             VStack {
                 SearchBar(text: $searchText)
                     .padding(.top, 16)
-                if isLoading {
+
+                if userVM.userId.isEmpty {
+                    // 로그인 전 가드
+                    Spacer()
+                    Text("로그인 후 키워드를 설정할 수 있어요.")
+                        .foregroundColor(.gray)
+                        .font(.caption)
+                    Spacer()
+                } else if isLoading {
                     ProgressView("Loading...")
                 } else {
                     if keywords.isEmpty {
@@ -64,7 +68,8 @@ struct KeywordSettingsView: View {
                                     Spacer()
                                 }
                                 .contextMenu {
-                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword,
+                                                                               keywordId: keyword.keywordId)) {
                                         Label("편집", systemImage: "pencil")
                                     }
                                     Button(role: .destructive) {
@@ -74,19 +79,17 @@ struct KeywordSettingsView: View {
                                     }
                                 }
                                 .swipeActions(edge: .trailing) {
-                                    Button("삭제") {
-                                        deleteKeyword(keywordId: keyword.keywordId)
-                                    }
-                                    .tint(.red)
-                                    
-                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword, keywordId: keyword.keywordId)) {
+                                    Button("삭제") { deleteKeyword(keywordId: keyword.keywordId) }
+                                        .tint(.red)
+                                    NavigationLink(destination: KeywordAddView(keyword: keyword.keyword,
+                                                                               keywordId: keyword.keywordId)) {
                                         Text("편집")
                                     }
                                     .tint(.gray)
                                 }
                             }
                         }
-                        .listStyle(PlainListStyle())
+                        .listStyle(.plain)
                     }
                 }
             }
@@ -98,38 +101,39 @@ struct KeywordSettingsView: View {
                     NavigationLink(destination: KeywordAddView()) {
                         Image(systemName: "plus")
                     }
+                    .disabled(userVM.userId.isEmpty)
                 }
             }
-            .onAppear {
-                fetchKeywords()
+            .onAppear { fetchKeywords() } // 화면 진입 시도
+            .onChange(of: userVM.userId, initial: true) { _, newValue in
+                if !newValue.isEmpty { fetchKeywords() }
             }
-            .onDisappear {
-                fetchKeywords()
-            }
+            // iOS 16 이하 호환 필요하면 위 onChange 대신 아래 사용:
+            // .task(id: userVM.userId) { if !userVM.userId.isEmpty { fetchKeywords() } }
         }
     }
 
     private func fetchKeywords() {
-        guard let url = URL(string: "http://54.180.92.32/keyword/user/\(userId)") else { return }
-        
+        guard !userVM.userId.isEmpty,
+              let url = URL(string: "http://3.34.3.103/keyword/user/\(userVM.userId)") else { return }
+
         isLoading = true
         URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {
                 isLoading = false
-                
+
                 if let error = error {
                     print("Error fetching keywords: \(error.localizedDescription)")
                     return
                 }
-                
                 guard let data = data else { return }
-                
+
                 do {
-                    let decodedResponse = try JSONDecoder().decode(KeywordResponse.self, from: data)
-                    if decodedResponse.success {
-                        self.keywords = decodedResponse.keywordList
+                    let decoded = try JSONDecoder().decode(KeywordResponse.self, from: data)
+                    if decoded.success {
+                        self.keywords = decoded.keywordList
                     } else {
-                        print("Failed to fetch keywords: \(decodedResponse.message)")
+                        print("Failed to fetch keywords: \(decoded.message)")
                     }
                 } catch {
                     print("Decoding error: \(error.localizedDescription)")
@@ -139,34 +143,33 @@ struct KeywordSettingsView: View {
     }
 
     private func deleteKeyword(keywordId: UUID) {
-        guard let url = URL(string: "http://54.180.92.32/keyword") else { return }
-        
+        guard !userVM.userId.isEmpty,
+              let url = URL(string: "http://54.180.92.32/keyword") else { return }
+
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         let body: [String: Any] = [
             "keywordId": keywordId.uuidString,
-            "userId": userId
+            "userId": userVM.userId
         ]
-        
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     print("Error deleting keyword: \(error.localizedDescription)")
                     return
                 }
-                
                 guard let data = data else { return }
-                
+
                 do {
-                    let decodedResponse = try JSONDecoder().decode(DeleteKeywordResponse.self, from: data)
-                    if decodedResponse.success {
+                    let decoded = try JSONDecoder().decode(DeleteKeywordResponse.self, from: data)
+                    if decoded.success {
                         self.keywords.removeAll { $0.keywordId == keywordId }
                     } else {
-                        print("Failed to delete keyword: \(decodedResponse.message)")
+                        print("Failed to delete keyword: \(decoded.message)")
                     }
                 } catch {
                     print("Decoding error: \(error.localizedDescription)")
@@ -178,7 +181,6 @@ struct KeywordSettingsView: View {
 
 struct SearchBar: View {
     @Binding var text: String
-    
     var body: some View {
         HStack {
             TextField("", text: $text)
@@ -195,20 +197,22 @@ struct SearchBar: View {
                         Spacer()
                     }
                 )
-            
             if !text.isEmpty {
-                Button("취소") {
-                    text = ""
-                }
-                .foregroundColor(.blue)
+                Button("취소") { text = "" }
+                    .foregroundColor(.blue)
             }
         }
         .padding(.horizontal)
     }
 }
 
-struct KeywordSettingsView_Previews: PreviewProvider {
-    static var previews: some View {
+#Preview {
+    NavigationStack {
         KeywordSettingsView()
+            .environmentObject({
+                let vm = UserViewModel()
+                vm.userId = "5cbd5b33-833f-430a-97f3-96706b12ce7" // 미리보기용
+                return vm
+            }())
     }
 }

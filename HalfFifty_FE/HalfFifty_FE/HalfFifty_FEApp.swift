@@ -20,6 +20,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 struct HalfFifty_FEApp: App {
     @StateObject private var fontSizeManager = FontSizeManager()
     @StateObject private var speechManager = SpeechRecognizerManager()
+    @StateObject private var userVM = UserViewModel()
 
     let notificationDelegate = NotificationDelegate()
 
@@ -32,6 +33,7 @@ struct HalfFifty_FEApp: App {
             NavigationView {
                 ContentView()
                     .environmentObject(speechManager)
+                    .environmentObject(userVM)
             }
             .environmentObject(fontSizeManager)
             .onAppear {

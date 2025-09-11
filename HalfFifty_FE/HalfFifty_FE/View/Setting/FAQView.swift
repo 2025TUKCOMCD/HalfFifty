@@ -99,7 +99,7 @@ class FAQViewModel: ObservableObject {
     @Published var isLoading = false
     
     func fetchFAQ() {
-        guard let url = URL(string: "http://54.180.92.32/FAQ") else { return }
+        guard let url = URL(string: "http://3.34.3.103/FAQ") else { return }
         
         isLoading = true
         

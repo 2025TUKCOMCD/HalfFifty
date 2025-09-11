@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CustomerCenterView: View {
+    @EnvironmentObject var userVM: UserViewModel
     @StateObject private var viewModel = AQViewModel()
     @State private var selectedQuestionID: UUID? = nil
     
@@ -15,7 +16,7 @@ struct CustomerCenterView: View {
         VStack {
             if viewModel.aqs.isEmpty {
                 Spacer()
-                Text("질문이 존재하지 않습니다")
+                Text(userVM.userId.isEmpty ? "로그인 후 문의 내역을 볼 수 있어요" : "질문이 존재하지 않습니다")
                     .font(.system(size: 16))
                     .foregroundColor(.gray)
                 Spacer()
@@ -29,7 +30,7 @@ struct CustomerCenterView: View {
                             )
                             .onTapGesture {
                                 withAnimation {
-                                    selectedQuestionID = selectedQuestionID == aq.aqId ? nil : aq.aqId
+                                    selectedQuestionID = (selectedQuestionID == aq.aqId) ? nil : aq.aqId
                                 }
                             }
                         }
@@ -46,18 +47,30 @@ struct CustomerCenterView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                    .background(Color(red: 0.2549019608, green: 0.4117647059, blue: 0.8823529412))
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }
             .padding(.bottom, 10)
+            .disabled(userVM.userId.isEmpty)
         }
         .padding(.top, 16)
         .navigationTitle("고객센터")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemGray6))
+        // 화면 진입 시 시도
         .onAppear {
-            viewModel.fetchAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2")
+            if !userVM.userId.isEmpty {
+                viewModel.fetchAQ(userId: userVM.userId)
+            }
+        }
+        
+        .onChange(of: userVM.userId, initial: false) { _, newValue in
+            if !newValue.isEmpty {
+                viewModel.fetchAQ(userId: newValue)
+            } else {
+                viewModel.aqs.removeAll()
+            }
         }
     }
 }
@@ -108,7 +121,7 @@ class AQViewModel: ObservableObject {
     @Published var isLoading = false
     
     func fetchAQ(userId: String) {
-        guard let url = URL(string: "http://54.180.92.32/AQ/user/\(userId)") else { return }
+        guard let url = URL(string: "http://3.34.3.103/AQ/user/\(userId)") else { return }
         
         isLoading = true
         
