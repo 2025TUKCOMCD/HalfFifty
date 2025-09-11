@@ -1,4 +1,3 @@
-//
 //  CSView.swift
 //  HalfFifty_FE
 //
@@ -8,10 +7,13 @@
 import SwiftUI
 
 struct InquiryView: View {
-    @State private var questionText: String = ""
+    @EnvironmentObject var userVM: UserViewModel
     @StateObject private var viewModel = AQViewModel()
-    @Environment(\.presentationMode) var presentationMode // 화면 닫기용
+    @Environment(\.dismiss) private var dismiss
+    @State private var questionText: String = ""
+    @State private var isSubmitting = false
     @State private var showErrorAlert = false
+    @State private var errorMessage = ""
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -24,13 +26,12 @@ struct InquiryView: View {
                     .cornerRadius(8)
                     .shadow(color: Color.gray.opacity(0.2), radius: 4)
                     .overlay(
-                        // 플레이스홀더 텍스트
                         Group {
                             if questionText.isEmpty {
                                 Text("내용을 작성해주세요")
                                     .foregroundColor(.gray)
                                     .padding(15)
-                                    .allowsHitTesting(false) // 입력 방해 방지
+                                    .allowsHitTesting(false)
                             }
                         }
                     )
@@ -47,20 +48,16 @@ struct InquiryView: View {
             Spacer()
 
             // 질문하기 버튼
-            Button(action: {
-                viewModel.saveAQ(userId: "1f273112-8e93-4444-a403-a986f8bea4a2", question: questionText) {_ in
-                    presentationMode.wrappedValue.dismiss() // 성공 시 화면 닫기
-                }
-            }) {
-                Text("질문하기")
+            Button(action: submit) {
+                Text(isSubmitting ? "등록 중..." : "질문하기")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(questionText.isEmpty ? Color.gray.opacity(0.5) : Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                    .background(isButtonEnabled ? Color(red: 0.2549, green: 0.4118, blue: 0.8824) : Color.gray.opacity(0.5))
                     .cornerRadius(8)
             }
-            .disabled(questionText.isEmpty)
+            .disabled(!isButtonEnabled)
             .padding(.bottom, 20)
         }
         .padding(.horizontal, 16)
@@ -68,56 +65,93 @@ struct InquiryView: View {
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle("질문하기")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("알림", isPresented: $showErrorAlert) {
+            Button("확인", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
     }
+
+    private var isButtonEnabled: Bool {
+        !questionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && !userVM.userId.isEmpty
+        && !isSubmitting
+    }
+
+    private func submit() {
+        let trimmed = questionText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        guard !userVM.userId.isEmpty else {
+            errorMessage = "로그인이 필요합니다."
+            showErrorAlert = true
+            return
+        }
+
+        isSubmitting = true
+        viewModel.saveAQ(userId: userVM.userId, question: trimmed) { success in
+            isSubmitting = false
+            if success {
+                dismiss()
+            } else {
+                errorMessage = "질문 등록에 실패했습니다. 잠시 후 다시 시도해주세요."
+                showErrorAlert = true
+            }
+        }
+    }
+}
+
+struct CreateAQResponse: Codable {
+    let success: Bool
+    let message: String
+    let aqId: UUID?
 }
 
 extension AQViewModel {
     func saveAQ(userId: String, question: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "http://54.180.92.32/AQ") else {
-            completion(false)
-            return
+        guard let url = URL(string: "http://3.34.3.103/AQ") else {
+            completion(false); return
         }
 
         let requestData: [String: Any] = [
             "userId": userId,
             "question": question
         ]
-
         guard let jsonData = try? JSONSerialization.data(withJSONObject: requestData) else {
-            completion(false)
-            return
+            completion(false); return
         }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = jsonData
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     print("질문 등록 오류: \(error.localizedDescription)")
-                    completion(false)
-                    return
+                    completion(false); return
+                }
+
+                if let http = response as? HTTPURLResponse,
+                   !(200...299).contains(http.statusCode) {
+                    let raw = String(data: data ?? .init(), encoding: .utf8) ?? ""
+                    completion(false); return
                 }
 
                 guard let data = data else {
-                    print("응답 데이터 없음")
-                    completion(false)
-                    return
+                    completion(false); return
                 }
 
                 do {
-                    let decodedResponse = try JSONDecoder().decode(AQResponse.self, from: data)
-                    if decodedResponse.success {
-                        print("질문 등록 성공: \(decodedResponse.message)")
+                    let decoded = try JSONDecoder().decode(CreateAQResponse.self, from: data)
+                    if decoded.success {
                         completion(true)
                     } else {
-                        print("질문 등록 실패: \(decodedResponse.message)")
                         completion(false)
                     }
                 } catch {
-                    print("디코딩 오류: \(error.localizedDescription)")
                     completion(false)
                 }
             }
@@ -126,5 +160,12 @@ extension AQViewModel {
 }
 
 #Preview {
-    InquiryView()
+    NavigationStack {
+        InquiryView()
+            .environmentObject({
+                let vm = UserViewModel()
+                vm.userId = "5cbd5b33-833f-430a-97f3-96706b12ce7" // 미리보기용
+                return vm
+            }())
+    }
 }
