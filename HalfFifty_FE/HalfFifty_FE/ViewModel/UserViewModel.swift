@@ -171,21 +171,53 @@ class UserViewModel: ObservableObject {
             }.resume()
         }
     
-    ///  서버 날짜 형식 (`2025-01-24T22:03:02.567423`) → "YYYY.MM.DD" 변환
+    /// 서버 날짜 문자열을 "yyyy.MM.dd" 로 변환
     private func formatDate(_ dateString: String) -> String {
-        print(dateString)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        formatter.locale = Locale(identifier: "ko_KR") // 한국어 로케일
-        formatter.timeZone = TimeZone(abbreviation: "UTC") // 서버가 UTC 기반이라면 설정
+        // 출력 포맷터 (KST 표시)
+        let output = DateFormatter()
+        output.dateFormat = "yyyy.MM.dd"
+        output.locale = Locale(identifier: "ko_KR")
+        output.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds] // 소수점 포함 허용
+        if let d = iso.date(from: dateString) {
+            return output.string(from: d)
+        }
         
-        if let date = formatter.date(from: dateString) {
-            let outputFormatter = DateFormatter()
-            outputFormatter.dateFormat = "yyyy.MM.dd" // 원하는 출력 형식
-            outputFormatter.locale = Locale(identifier: "ko_KR")
-            return outputFormatter.string(from: date)
+        let input = DateFormatter()
+        input.locale = Locale(identifier: "en_US_POSIX")
+        input.timeZone = TimeZone(secondsFromGMT: 0)
+
+        let candidates = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS", // 나노초(최대 9자리)
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSS",    // 마이크로초(6자리)
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",       // 밀리초(3자리)
+            "yyyy-MM-dd'T'HH:mm:ss"            // 소수점 없음
+        ]
+
+        for fmt in candidates {
+            input.dateFormat = fmt
+            if let d = input.date(from: dateString) {
+                return output.string(from: d)
+            }
+        }
+
+        // 3) 최후: 소수점 이하 잘라내고 재시도 (예외 문자열 대비)
+        if let dot = dateString.firstIndex(of: "."),
+           let tEnd = dateString.firstIndex(of: "T") {
+            // "yyyy-MM-ddTHH:mm:ss"까지만 남김
+            let base = String(dateString[..<dot])
+            // 혹시 초 뒤에 다른 문자가 붙어 있으면 정리
+            let secEnd = base.index(tEnd, offsetBy: 9, limitedBy: base.endIndex) ?? base.endIndex
+            let trimmed = String(base[..<secEnd])
+            input.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+            if let d = input.date(from: trimmed) {
+                return output.string(from: d)
+            }
         }
 
         return "날짜 변환 오류"
     }
+
 }
