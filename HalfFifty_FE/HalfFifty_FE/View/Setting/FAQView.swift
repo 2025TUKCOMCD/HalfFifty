@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FAQView: View {
+    @EnvironmentObject var userVM: UserViewModel
     @StateObject private var viewModel = FAQViewModel()
     @State private var selectedQuestion: UUID? = nil
     
@@ -21,7 +22,7 @@ struct FAQView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 10) {
-                        ForEach(viewModel.faqs, id: \..faqId) { faq in
+                        ForEach(viewModel.faqs) { faq in
                             FAQItemView(
                                 question: faq.question,
                                 answer: faq.answer,
@@ -29,13 +30,13 @@ struct FAQView: View {
                             )
                             .onTapGesture {
                                 withAnimation {
-                                    selectedQuestion = selectedQuestion == faq.faqId ? nil : faq.faqId
+                                    selectedQuestion = (selectedQuestion == faq.faqId) ? nil : faq.faqId
                                 }
                             }
                         }
                     }
+                    .padding()
                 }
-                .padding()
             }
             
             Spacer()
@@ -46,7 +47,7 @@ struct FAQView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(red: 0.2549019607843137, green: 0.4117647058823529, blue: 0.8823529411764706))
+                    .background(Color(red: 0.2549019608, green: 0.4117647059, blue: 0.8823529412))
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }
@@ -56,41 +57,8 @@ struct FAQView: View {
         .navigationTitle("FAQ")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            viewModel.fetchFAQ()
+            viewModel.fetchFAQ(baseUrl: userVM.baseUrl)
         }
-    }
-}
-
-struct FAQItemView: View {
-    let question: String
-    let answer: String
-    let isExpanded: Bool
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("\(question)")
-                    .font(.system(size: 16, weight: .bold))
-                
-                Spacer()
-                
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .foregroundColor(.gray)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
-            
-            if isExpanded {
-                Text(answer)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
-                    .padding(.bottom, 10)
-            }
-        }
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: Color.gray.opacity(0.2), radius: 4, x: 0, y: 2)
     }
 }
 
@@ -98,8 +66,8 @@ class FAQViewModel: ObservableObject {
     @Published var faqs: [FAQ] = []
     @Published var isLoading = false
     
-    func fetchFAQ() {
-        guard let url = URL(string: "http://3.34.3.103/FAQ") else { return }
+    func fetchFAQ(baseUrl: String) {
+        guard let url = URL(string: "\(baseUrl)FAQ") else { return }
         
         isLoading = true
         
@@ -139,10 +107,46 @@ struct FAQ: Codable, Identifiable {
     let faqId: UUID
     let question: String
     let answer: String
-    
     var id: UUID { faqId }
 }
 
+struct FAQItemView: View {
+    let question: String
+    let answer: String
+    let isExpanded: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(question)
+                    .font(.system(size: 16, weight: .bold))
+                Spacer()
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .foregroundColor(.gray)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            
+            if isExpanded {
+                Text(answer)
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .padding(.horizontal)
+                    .padding(.bottom, 10)
+            }
+        }
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(color: Color.gray.opacity(0.2), radius: 4, x: 0, y: 2)
+    }
+}
+
 #Preview {
-    FAQView()
+    NavigationStack {
+        FAQView()
+            .environmentObject({
+                let vm = UserViewModel()
+                return vm
+            }())
+    }
 }

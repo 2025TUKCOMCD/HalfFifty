@@ -14,7 +14,11 @@ struct CustomerCenterView: View {
     
     var body: some View {
         VStack {
-            if viewModel.aqs.isEmpty {
+            if viewModel.isLoading {
+                ProgressView("로딩 중...")
+                    .padding(.top, 32)
+                Spacer()
+            } else if viewModel.aqs.isEmpty {
                 Spacer()
                 Text(userVM.userId.isEmpty ? "로그인 후 문의 내역을 볼 수 있어요" : "질문이 존재하지 않습니다")
                     .font(.system(size: 16))
@@ -38,16 +42,16 @@ struct CustomerCenterView: View {
                     .padding(.horizontal)
                 }
             }
-            
+
             Spacer()
-            
+
             NavigationLink(destination: InquiryView()) {
                 Text("질문하기")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(red: 0.2549019608, green: 0.4117647059, blue: 0.8823529412))
+                    .background(Color(red: 0.2549, green: 0.4118, blue: 0.8824))
                     .cornerRadius(8)
                     .padding(.horizontal, 16)
             }
@@ -58,16 +62,14 @@ struct CustomerCenterView: View {
         .navigationTitle("고객센터")
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemGray6))
-        // 화면 진입 시 시도
         .onAppear {
             if !userVM.userId.isEmpty {
-                viewModel.fetchAQ(userId: userVM.userId)
+                viewModel.fetchAQ(userId: userVM.userId, baseUrl: userVM.baseUrl)
             }
         }
-        
         .onChange(of: userVM.userId, initial: false) { _, newValue in
             if !newValue.isEmpty {
-                viewModel.fetchAQ(userId: newValue)
+                viewModel.fetchAQ(userId: newValue, baseUrl: userVM.baseUrl)
             } else {
                 viewModel.aqs.removeAll()
             }
@@ -119,23 +121,21 @@ struct QuestionRow: View {
 class AQViewModel: ObservableObject {
     @Published var aqs: [AQ] = []
     @Published var isLoading = false
-    
-    func fetchAQ(userId: String) {
-        guard let url = URL(string: "http://3.34.3.103/AQ/user/\(userId)") else { return }
-        
+
+    func fetchAQ(userId: String, baseUrl: String) {
+        guard let url = URL(string: "\(baseUrl)AQ/user/\(userId)") else { return }
+
         isLoading = true
-        
         URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false
-                
+
                 if let error = error {
                     print("AQ 불러오기 오류: \(error.localizedDescription)")
                     return
                 }
-                
                 guard let data = data else { return }
-                
+
                 do {
                     let decodedResponse = try JSONDecoder().decode(AQResponse.self, from: data)
                     if decodedResponse.success {

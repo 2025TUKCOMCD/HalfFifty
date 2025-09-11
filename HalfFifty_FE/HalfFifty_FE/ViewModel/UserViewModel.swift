@@ -22,6 +22,8 @@ class UserViewModel: ObservableObject {
     @Published var loginMessage: String = ""
 
     private let baseURL = "http://3.34.3.103/"
+    
+    var baseUrl: String { baseURL }
 
     func login(appleId: String, password: String, completion: @escaping (Bool) -> Void) {
         var components = URLComponents(string: "\(baseURL)user/login")

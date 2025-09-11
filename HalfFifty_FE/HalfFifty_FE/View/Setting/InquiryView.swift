@@ -81,7 +81,6 @@ struct InquiryView: View {
     private func submit() {
         let trimmed = questionText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-
         guard !userVM.userId.isEmpty else {
             errorMessage = "로그인이 필요합니다."
             showErrorAlert = true
@@ -89,7 +88,9 @@ struct InquiryView: View {
         }
 
         isSubmitting = true
-        viewModel.saveAQ(userId: userVM.userId, question: trimmed) { success in
+        viewModel.saveAQ(userId: userVM.userId,
+                         question: trimmed,
+                         baseUrl: userVM.baseUrl) { success in
             isSubmitting = false
             if success {
                 dismiss()
@@ -108,17 +109,23 @@ struct CreateAQResponse: Codable {
 }
 
 extension AQViewModel {
-    func saveAQ(userId: String, question: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "http://3.34.3.103/AQ") else {
-            completion(false); return
+    func saveAQ(userId: String,
+                question: String,
+                baseUrl: String,
+                completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "\(baseUrl)AQ") else {
+            completion(false)
+            return
         }
 
         let requestData: [String: Any] = [
             "userId": userId,
             "question": question
         ]
+
         guard let jsonData = try? JSONSerialization.data(withJSONObject: requestData) else {
-            completion(false); return
+            completion(false)
+            return
         }
 
         var request = URLRequest(url: url)
@@ -131,20 +138,26 @@ extension AQViewModel {
             DispatchQueue.main.async {
                 if let error = error {
                     print("질문 등록 오류: \(error.localizedDescription)")
-                    completion(false); return
+                    completion(false)
+                    return
                 }
-
                 if let http = response as? HTTPURLResponse,
                    !(200...299).contains(http.statusCode) {
-                    let raw = String(data: data ?? .init(), encoding: .utf8) ?? ""
-                    completion(false); return
+                    completion(false)
+                    return
                 }
-
                 guard let data = data else {
-                    completion(false); return
+                    print("응답 데이터 없음")
+                    completion(false)
+                    return
                 }
-
                 do {
+                    // 등록용 응답 모델로 디코딩 (예: CreateAQResponse)
+                    struct CreateAQResponse: Codable {
+                        let success: Bool
+                        let message: String
+                        let aqId: UUID?
+                    }
                     let decoded = try JSONDecoder().decode(CreateAQResponse.self, from: data)
                     if decoded.success {
                         completion(true)
@@ -158,6 +171,7 @@ extension AQViewModel {
         }.resume()
     }
 }
+
 
 #Preview {
     NavigationStack {

@@ -115,7 +115,7 @@ struct KeywordSettingsView: View {
 
     private func fetchKeywords() {
         guard !userVM.userId.isEmpty,
-              let url = URL(string: "http://3.34.3.103/keyword/user/\(userVM.userId)") else { return }
+              let url = URL(string: "\(userVM.baseUrl)keyword/user/\(userVM.userId)") else { return }
 
         isLoading = true
         URLSession.shared.dataTask(with: url) { data, response, error in
@@ -144,7 +144,7 @@ struct KeywordSettingsView: View {
 
     private func deleteKeyword(keywordId: UUID) {
         guard !userVM.userId.isEmpty,
-              let url = URL(string: "http://54.180.92.32/keyword") else { return }
+              let url = URL(string: "\(userVM.baseUrl)keyword") else { return }
 
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
