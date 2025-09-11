@@ -1,4 +1,3 @@
-//
 //  ContentView.swift
 //  HalfFifty_FE
 //
@@ -19,6 +18,9 @@ struct ContentView: View {
 
     // UserViewModel 인스턴스 생성
     @StateObject private var userViewModel = UserViewModel()
+    
+    // userId로 fetchUser를 중복 호출하지 않기 위한 플래그
+    @State private var didFetchUser = false
         
     var body: some View {
         let drag = DragGesture()
@@ -30,45 +32,65 @@ struct ContentView: View {
                 }
             }
         
+        let isLoggedIn = !userViewModel.userId.isEmpty // 로그인 여부 판단
+        
         return NavigationStack {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    if self.showMainView {
-                        if self.showTutorialView {
-                            TutorialView(showTutorialView: $showTutorialView) // 바인딩 전달
-                        } else {
-                            // 메뉴 표시 여부 바인딩
-                            MainView(showMenuView: $showMenuView)
-                                .frame(width: geometry.size.width, height: geometry.size.height)
-                                .disabled(self.showMenuView) // 메뉴 표시 상태면 메인 뷰 비활성화
-                            
-                            if self.showMenuView {
-                                MenuView(showMenuView: $showMenuView, userViewModel: userViewModel)
-                                    .transition(.move(edge: .leading).combined(with: .opacity))
-                                    .zIndex(2) // 항상 최상위에 있도록 설정
-                            }
-                        }
+                    if !isLoggedIn {
+                        LoginView()
+                            .environmentObject(userViewModel)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        SplashView()
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
-                                    withAnimation {
-                                        let isFirstLaunch = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
-                                        self.showTutorialView = isFirstLaunch
-                                        self.showMainView = true
-                                        
-                                        if isFirstLaunch {
-                                            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+                        if self.showMainView {
+                            if self.showTutorialView {
+                                TutorialView(showTutorialView: $showTutorialView) // 바인딩 전달
+                            } else {
+                                // 메뉴 표시 여부 바인딩
+                                MainView(showMenuView: $showMenuView)
+                                    .frame(width: geometry.size.width, height: geometry.size.height)
+                                    .disabled(self.showMenuView) // 메뉴 표시 상태면 메인 뷰 비활성화
+                                
+                                if self.showMenuView {
+                                    MenuView(showMenuView: $showMenuView, userViewModel: userViewModel)
+                                        .transition(.move(edge: .leading).combined(with: .opacity))
+                                        .zIndex(2) // 항상 최상위에 있도록 설정
+                                }
+                            }
+                        } else {
+                            SplashView()
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                                        withAnimation {
+                                            let isFirstLaunch = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+                                            self.showTutorialView = isFirstLaunch
+                                            self.showMainView = true
+                                            
+                                            if isFirstLaunch {
+                                                UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+                                            }
                                         }
                                     }
                                 }
-                                userViewModel.fetchUser(userId: "1f273112-8e93-4444-a403-a986f8bea4a2")
-                            }
+                        }
                     }
                 }
                 .gesture(drag)
             }
         }
+        // 앱 시작 시 이미 userId가 있다면 한 번만 조회
+        .onAppear {
+            if !userViewModel.userId.isEmpty && !didFetchUser {
+                didFetchUser = true
+                userViewModel.fetchUser(userId: userViewModel.userId)
+            }
+        }
+        .onChange(of: userViewModel.userId, initial: true) { oldValue, newValue in
+            guard !newValue.isEmpty, !didFetchUser else { return }
+            didFetchUser = true
+            userViewModel.fetchUser(userId: newValue)
+        }
+
     }
 }
 
