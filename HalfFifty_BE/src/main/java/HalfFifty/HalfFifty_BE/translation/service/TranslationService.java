@@ -4,10 +4,7 @@ import HalfFifty.HalfFifty_BE.translation.bean.DeleteTranslationBean;
 import HalfFifty.HalfFifty_BE.translation.bean.FlaskSignLanguageBean;
 import HalfFifty.HalfFifty_BE.translation.bean.FrameBufferBean;
 import HalfFifty.HalfFifty_BE.translation.bean.SaveTranslationBean;
-import HalfFifty.HalfFifty_BE.translation.domain.DTO.FrameBufferResult;
-import HalfFifty.HalfFifty_BE.translation.domain.DTO.RequestSignLanguageDTO;
-import HalfFifty.HalfFifty_BE.translation.domain.DTO.RequestTranslationDeleteDTO;
-import HalfFifty.HalfFifty_BE.translation.domain.DTO.ResponseTranslationGetDTO;
+import HalfFifty.HalfFifty_BE.translation.domain.DTO.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,36 +30,52 @@ public class TranslationService {
         this.frameBufferBean = frameBufferBean;
     }
 
-    // 기존 메서드 시그니처 그대로 유지하면서 내부적으로 버퍼링 처리
-    public ResponseTranslationGetDTO signLanguageTranslation(RequestSignLanguageDTO requestSignLanguageDTO) {
-        // AI 서버에서 예측 결과 받기
-        Map<String, Object> aiResponse = flaskSignLanguageBean.exec(requestSignLanguageDTO);
+    public TranslationStatusResponse getTranslationStatus(RequestSignLanguageDTO requestSignLanguageDTO) {
+        try {
+            Map<String, Object> aiResponse = flaskSignLanguageBean.exec(requestSignLanguageDTO);
 
-        if (aiResponse != null && Boolean.TRUE.equals(aiResponse.get("success"))) {
-            String predictedWord = (String) aiResponse.get("predicted_label");
-            Double confidence = (Double) aiResponse.get("confidence");
+            if (aiResponse != null && Boolean.TRUE.equals(aiResponse.get("success"))) {
+                String predictedWord = (String) aiResponse.get("predicted_label");
+                Double confidence = (Double) aiResponse.get("confidence");
 
-            // 프레임 버퍼에 추가하고 다수결 확인
-            FrameBufferResult bufferResult = frameBufferBean.addFrame(
-                    requestSignLanguageDTO.getUserId(),
-                    predictedWord
-            );
-
-            // 확정된 경우에만 저장하고 반환
-            if (bufferResult.isConfirmed()) {
-                return saveTranslationBean.exec(
+                FrameBufferResult bufferResult = frameBufferBean.addFrame(
                         requestSignLanguageDTO.getUserId(),
-                        bufferResult.getConfirmedWord(),
-                        confidence
+                        predictedWord
                 );
-            } else {
-                // 아직 확정되지 않은 경우 null 반환
-                // -> 프론트엔드에서는 기존처럼 "번역 실패"로 처리됨
-                return null;
-            }
-        }
 
-        return null;
+                if (bufferResult.isConfirmed()) {
+                    ResponseTranslationGetDTO result = saveTranslationBean.exec(
+                            requestSignLanguageDTO.getUserId(),
+                            bufferResult.getConfirmedWord(),
+                            confidence
+                    );
+                    return TranslationStatusResponse.builder()
+                            .status("success")
+                            .message("수화 번역 성공")
+                            .data(result)
+                            .build();
+                } else {
+                    return TranslationStatusResponse.builder()
+                            .status("processing")
+                            .message("수화 인식 중... (" + bufferResult.getCurrentBufferSize() + "/5)")
+                            .data(null)
+                            .build();
+                }
+            } else {
+                return TranslationStatusResponse.builder()
+                        .status("failed")
+                        .message("수화 인식 실패")
+                        .data(null)
+                        .build();
+            }
+
+        } catch (Exception e) {
+            return TranslationStatusResponse.builder()
+                    .status("failed")
+                    .message("서버 오류: " + e.getMessage())
+                    .data(null)
+                    .build();
+        }
     }
 
     // 번역 기록 삭제
