@@ -208,9 +208,9 @@ struct MainView: View {
                             VStack {
                                 HStack(spacing: 8) {
                                     switch recStatus {
-                                    case .processing(let cur, let tot, let msg):
+                                    case .processing(_, _, let msg):
                                         ProgressView().progressViewStyle(CircularProgressViewStyle())
-                                        Text("\(msg)  \(cur)/\(tot)")
+                                        Text("\(msg)")
                                             .font(.system(size: 14, weight: .semibold))
                                     case .failed(let message):
                                         Image(systemName: "exclamationmark.triangle.fill")
@@ -283,10 +283,12 @@ struct MainView: View {
         }
         // 진행 중
         .onReceive(NotificationCenter.default.publisher(for: .TranslationProgress)) { note in
-            let cur = note.userInfo?["current"] as? Int ?? 0
-            let tot = note.userInfo?["total"] as? Int ?? 5
             let msg = note.userInfo?["message"] as? String ?? "수화 인식 중..."
-            self.recStatus = .processing(current: cur, total: tot, message: msg)
+            self.recStatus = .processing(
+                current: note.userInfo?["current"] as? Int ?? 0,
+                total: note.userInfo?["total"] as? Int ?? 5,
+                message: msg
+            )
             withAnimation { self.showStatusBanner = true }
         }
         // 실패

@@ -408,11 +408,7 @@ extension CameraViewController: HandLandmarkerLiveStreamDelegate {
         switch status {
         case "processing":
             let step = parseStep(response.message)
-            if let cur = step?.current, let tot = step?.total {
-                progressStep = cur
-            } else {
-                progressStep = min(progressStep + 1, totalSteps)
-            }
+            
             NotificationCenter.default.post(
                 name: .TranslationProgress,
                 object: nil,
