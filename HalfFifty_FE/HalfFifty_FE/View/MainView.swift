@@ -17,6 +17,8 @@ struct MainView: View {
     @State var useMicrophone: Bool = false // 음성 입력 사용 여부
     @State private var cameraFrame: CGRect = .zero // 카메라 크기 저장
     @State private var translationResultList: [String] = [] // 번역 결과 리스트
+    @State private var recStatus: RecognitionStatus = .idle
+    @State private var showStatusBanner: Bool = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -201,6 +203,40 @@ struct MainView: View {
                                 .padding(.bottom, 20)
                             }
                         }
+                        
+                        if showStatusBanner {
+                            VStack {
+                                HStack(spacing: 8) {
+                                    switch recStatus {
+                                    case .processing(let cur, let tot, let msg):
+                                        ProgressView().progressViewStyle(CircularProgressViewStyle())
+                                        Text("\(msg)  \(cur)/\(tot)")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    case .failed(let message):
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                        Text(message)
+                                            .font(.system(size: 14, weight: .semibold))
+                                    case .success(let word, let prob):
+                                        Image(systemName: "checkmark.circle.fill")
+                                        Text("인식: \(word) (\(Int(prob*100))%)")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    case .idle:
+                                        EmptyView()
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 12)
+                                .background(Color.black.opacity(0.6))
+                                .cornerRadius(12)
+                                .padding(.top, 12)
+
+                                Spacer()
+                            }
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .animation(.easeInOut(duration: 0.2), value: showStatusBanner)
+                        }
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: geometry.size.height / 1.7)
                     .background(Color.black)
@@ -245,6 +281,44 @@ struct MainView: View {
                 }
             }
         }
+        // 진행 중
+        .onReceive(NotificationCenter.default.publisher(for: .TranslationProgress)) { note in
+            let cur = note.userInfo?["current"] as? Int ?? 0
+            let tot = note.userInfo?["total"] as? Int ?? 5
+            let msg = note.userInfo?["message"] as? String ?? "수화 인식 중..."
+            self.recStatus = .processing(current: cur, total: tot, message: msg)
+            withAnimation { self.showStatusBanner = true }
+        }
+        // 실패
+        .onReceive(NotificationCenter.default.publisher(for: .TranslationFailed)) { note in
+            let msg = note.userInfo?["message"] as? String ?? "수화 인식 실패"
+            self.recStatus = .failed(message: msg)
+            withAnimation { self.showStatusBanner = true }
+            // 잠깐 보여주고 숨김
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation { self.showStatusBanner = false }
+                self.recStatus = .idle
+            }
+        }
+        // 성공
+        .onReceive(NotificationCenter.default.publisher(for: .TranslationSuccess)) { note in
+            let word = note.userInfo?["translatedWord"] as? String ?? ""
+            let prob = note.userInfo?["probability"] as? Float ?? 0
+            self.recStatus = .success(word: word, prob: prob)
+            withAnimation { self.showStatusBanner = true }
+
+            // 칩에 추가 (중복 방지 + 최대 10개 유지)
+            if self.translationResultList.last != word {
+                self.translationResultList.append(word)
+                if self.translationResultList.count > 10 { self.translationResultList.removeFirst() }
+            }
+
+            // 잠깐 보여주고 숨김
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation { self.showStatusBanner = false }
+                self.recStatus = .idle
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .onAppear {
             checkCameraAuthorizationStatus()
@@ -279,6 +353,13 @@ struct MainView: View {
             UIApplication.shared.open(url)
         }
     }
+}
+
+enum RecognitionStatus: Equatable {
+    case idle
+    case processing(current: Int, total: Int, message: String)
+    case failed(message: String)
+    case success(word: String, prob: Float)
 }
 
 #Preview {
