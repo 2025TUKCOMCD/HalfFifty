@@ -270,14 +270,11 @@ struct MainView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("TranslationResult"))) { notification in
             if let translatedWord = notification.userInfo?["translatedWord"] as? String {
-                // 같은 단어 필터링
-                if self.translationResultList.last != translatedWord {
-                    self.translationResultList.append(translatedWord)
+                self.translationResultList.append(translatedWord)
 
-                    // 번역 결과 최대 개수 지정
-                    if self.translationResultList.count > 10 {
-                        self.translationResultList.removeFirst()
-                    }
+                // 최대 10개 유지
+                if self.translationResultList.count > 10 {
+                    self.translationResultList.removeFirst()
                 }
             }
         }
@@ -309,11 +306,8 @@ struct MainView: View {
             self.recStatus = .success(word: word, prob: prob)
             withAnimation { self.showStatusBanner = true }
 
-            // 칩에 추가 (중복 방지 + 최대 10개 유지)
-            if self.translationResultList.last != word {
-                self.translationResultList.append(word)
-                if self.translationResultList.count > 10 { self.translationResultList.removeFirst() }
-            }
+            self.translationResultList.append(word)
+            if self.translationResultList.count > 10 { self.translationResultList.removeFirst() }
 
             // 잠깐 보여주고 숨김
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
