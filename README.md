@@ -124,12 +124,7 @@
 <br>
 
 ## 📱 Prototype 📱
-### Mobile
-![Feb-26-2025 13-53-36](https://github.com/user-attachments/assets/5b4e5502-70ef-4911-b3ff-500ac6a26ea3)
-![Feb-26-2025 13-53-41](https://github.com/user-attachments/assets/e874f773-fb0a-4894-a218-479146775ad7)
-
-### Watch
-![watch](https://github.com/user-attachments/assets/387b9c04-7fe8-468a-a1bd-758ed9dad192)
+https://github.com/user-attachments/assets/ede0f48c-89a4-4149-aaf6-7499b99f237b
 
 ## 🚨 회의 🚨
 - [3학년 2학기] 정기회의: 화요일 22시 30분
